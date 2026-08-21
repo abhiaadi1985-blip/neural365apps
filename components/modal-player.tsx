@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface ModalPlayerProps {
   src:    string | null
@@ -57,8 +59,58 @@ export default function ModalPlayer({ src, kind, label, onClose }: ModalPlayerPr
               <audio src={src} controls style={{ width: '100%' }} autoPlay />
             </div>
           ) : (
-            /* Placeholder — no real media src yet */
-            <button className="play-btn" aria-label="Play (placeholder)">▶</button>
+            /* Placeholder — no real media src yet: show logo linking to home */
+            <Link
+              href="/"
+              aria-label="Go to neural365 Community home"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 16,
+                width: '100%',
+                height: '100%',
+                textDecoration: 'none',
+                padding: '32px 0',
+              }}
+            >
+              {/* Pulsing logo container */}
+              <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 96,
+                height: 96,
+                borderRadius: '50%',
+                background: 'rgba(47,134,255,0.12)',
+                border: '1.5px solid rgba(47,134,255,0.35)',
+                boxShadow: '0 0 28px rgba(47,134,255,0.2)',
+                animation: 'pulse-glow 2.4s ease-in-out infinite',
+              }}>
+                <Image
+                  src="/neural365-logo-mark.png"
+                  alt="neural365 Community"
+                  width={60}
+                  height={60}
+                  style={{ filter: 'brightness(1.1)' }}
+                />
+              </span>
+              <span style={{
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '0.72rem',
+                color: 'var(--text-muted)',
+                letterSpacing: '0.08em',
+              }}>
+                Go to neural365 Community →
+              </span>
+              <style>{`
+                @keyframes pulse-glow {
+                  0%, 100% { box-shadow: 0 0 28px rgba(47,134,255,0.2); }
+                  50%       { box-shadow: 0 0 48px rgba(47,134,255,0.42); }
+                }
+              `}</style>
+            </Link>
           )}
         </div>
         <div className="modal-footer">

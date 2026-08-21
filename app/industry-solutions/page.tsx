@@ -1,18 +1,16 @@
 import type { Metadata } from 'next'
 import HeroMesh from '@/components/hero-mesh'
 import { PulseGrid } from '@/components/pulse-grid'
-import type { PulseItem } from '@/components/pulse-grid'
 import RelatedGuides from '@/components/related-guides'
 import type { GuideStub } from '@/components/related-guides'
+import { SEED_PULSE } from '@/lib/seed-pulse'
 
 export const metadata: Metadata = {
-  title: 'Industry Solutions — neural365apps',
+  title: 'Industry Solutions — neural365 COMMUNITY',
   description: 'Purpose-built AI for Manufacturing, Retail, Healthcare and beyond — pre-built agent templates, vertical Copilot features, and the roadmap items that matter for your sector.',
 }
 
-const PILLAR_ITEMS: PulseItem[] = [
-  { id: 'i1', lane: 'coming', pillar: 'industry-solutions', title: 'Industry agent templates: Manufacturing', summary: 'Pre-built agent scaffolds for shop-floor exception handling and planner co-review.', sourceUrl: '#', sourceName: 'Roadmap', publishedAt: 'roadmap' },
-]
+const PILLAR_ITEMS = SEED_PULSE.filter(i => i.pillar === 'industry-solutions')
 
 const RELATED_GUIDES: GuideStub[] = [
   { slug: 'manufacturing-agents',   title: 'Industry agent templates: Manufacturing overview',  isPremium: false },

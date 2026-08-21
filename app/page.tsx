@@ -9,7 +9,7 @@ import type { MediaItem } from '@/components/media-row'
 import SignupForm from '@/components/signup-form'
 import ModalPlayer from '@/components/modal-player'
 import { landing } from '@/app/copy'
-import type { PulseItem } from '@/components/pulse-grid'
+import type { PulseItem } from '@/lib/seed-pulse'
 
 // ── Seed data (mirrors the 9 reference HTML sample cards) ──
 const SEED_PULSE: PulseItem[] = [
@@ -51,8 +51,8 @@ const SEED_PULSE: PulseItem[] = [
   },
   {
     id: '7', lane: 'architecture', pillar: 'dataverse-power-platform',
-    title:     'Fabric-linked retention defaults',
-    summary:   'Long-term Dataverse retention now flows through Fabric-managed policies by default for new environments.',
+    title:     'Dataverse long-term retention via Fabric link',
+    summary:   'Dataverse environments on the new retention policy use Fabric as the underlying storage link — what that means for your data lifecycle.',
     sourceUrl: '#', sourceName: 'Microsoft Learn', publishedAt: '5d ago',
   },
   {
@@ -78,7 +78,7 @@ const SEED_SHORTS: MediaItem[] = [
 
 const SEED_PODCASTS: MediaItem[] = [
   { id: 'p1', kind: 'podcast', title: 'Why reconciliation agents need a human gate',    durationSec: 312, href: '/guides/reconciliation-agents' },
-  { id: 'p2', kind: 'podcast', title: 'What Fabric-linked retention means for you',      durationSec: 285, href: '/guides/fabric-retention' },
+  { id: 'p2', kind: 'podcast', title: 'What the new Dataverse retention policy means for your data',  durationSec: 285, href: '/guides/fabric-retention' },
   { id: 'p3', kind: 'podcast', title: 'Cross-app agent handoffs, explained',             durationSec: 330, href: '/guides/agent-handoffs' },
 ]
 
@@ -120,7 +120,7 @@ export default function HomePage() {
             <Link href="/pulse" className="btn btn-primary">
               {landing.hero.ctaPrimary}
             </Link>
-            <button className="btn btn-ghost" onClick={openIntroModal}>
+            <button suppressHydrationWarning className="btn btn-ghost" onClick={openIntroModal}>
               {landing.hero.ctaSecondary}
             </button>
           </div>

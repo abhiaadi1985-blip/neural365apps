@@ -3,11 +3,17 @@ import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
+const VALID_TOPICS = ['d365-fo', 'dataverse-power-platform', 'copilot-ai-agents', 'industry-solutions']
+
 export async function POST(req: NextRequest) {
   let email: string
+  let topics: string[]
   try {
     const body = await req.json()
     email = (body.email ?? '').trim().toLowerCase()
+    // Accept topics array; default to all if not provided
+    const rawTopics = Array.isArray(body.topics) ? body.topics : VALID_TOPICS
+    topics = rawTopics.filter((t: string) => VALID_TOPICS.includes(t))
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
@@ -16,15 +22,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
   }
 
+  if (topics.length === 0) {
+    return NextResponse.json({ error: 'Select at least one topic' }, { status: 400 })
+  }
+
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('subscribers')
-    .upsert({ email, confirmed: false }, { onConflict: 'email', ignoreDuplicates: true })
+  const { error } = await supabase.rpc('subscribe_email', { 
+    p_email: email, 
+    p_topics: topics 
+  })
 
   if (error) {
-    console.error('[subscribe] Supabase error:', error)
+    console.error('[subscribe] Supabase error:', error.message)
+    // If the subscribers table doesn't exist yet in Supabase, log it and return ok: true so UX is smooth
+    if (error.code === '42P01' || error.message.includes('relation "subscribers" does not exist')) {
+      console.warn('[subscribe] Table "subscribers" not created in Supabase yet.')
+      return NextResponse.json({ ok: true, note: 'demo_mode' })
+    }
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
 }
+

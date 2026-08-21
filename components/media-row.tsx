@@ -17,7 +17,7 @@ export function MediaCard({ item, onPlay }: { item: MediaItem; onPlay?: () => vo
   const isShort = item.kind === 'short'
 
   return (
-    <div className="media-card" onClick={onPlay} role="button" tabIndex={0}
+    <div suppressHydrationWarning className="media-card" onClick={onPlay} role="button" tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onPlay?.()}
       aria-label={`${item.title} — ${dur}`}>
       <div className={`media-thumb ${isShort ? 'short' : ''}`}>

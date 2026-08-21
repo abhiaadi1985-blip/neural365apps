@@ -1,20 +1,16 @@
 import type { Metadata } from 'next'
 import HeroMesh from '@/components/hero-mesh'
 import { PulseGrid } from '@/components/pulse-grid'
-import type { PulseItem } from '@/components/pulse-grid'
+import { SEED_PULSE } from '@/lib/seed-pulse'
 import RelatedGuides from '@/components/related-guides'
 import type { GuideStub } from '@/components/related-guides'
 
 export const metadata: Metadata = {
-  title: 'Copilot & AI Agents — neural365apps',
+  title: 'Copilot & AI Agents — neural365 COMMUNITY',
   description: 'Copilot Studio, multi-agent orchestration, cross-app handoffs — focused coverage of everything that moves the needle for D365 AI implementers.',
 }
 
-const PILLAR_ITEMS: PulseItem[] = [
-  { id: 'c1', lane: 'new', pillar: 'copilot-ai-agents', title: 'Dataverse generative answers GA', summary: 'GA grounding over Dataverse tables for Copilot Studio agents enables richer, plug-in-free experiences.', sourceUrl: '#', sourceName: 'Microsoft Blog', publishedAt: '3d ago' },
-  { id: 'c2', lane: 'coming', pillar: 'copilot-ai-agents', title: 'Autonomous reconciliation agents', summary: 'Preview agents that propose and explain journal matches, with a human approval step before posting.', sourceUrl: '#', sourceName: 'Roadmap', publishedAt: 'roadmap' },
-  { id: 'c3', lane: 'coming', pillar: 'copilot-ai-agents', title: 'Cross-app agent handoffs', summary: 'An agent started in Power Apps that can hand off context to a Copilot Studio agent mid-task.', sourceUrl: '#', sourceName: 'Roadmap', publishedAt: 'roadmap' },
-]
+const PILLAR_ITEMS = SEED_PULSE.filter(i => i.pillar === 'copilot-ai-agents')
 
 const RELATED_GUIDES: GuideStub[] = [
   { slug: 'copilot-studio-dataverse',   title: 'Set up a Copilot Studio agent in Dataverse',     isPremium: false },

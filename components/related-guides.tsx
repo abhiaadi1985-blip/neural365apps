@@ -1,7 +1,5 @@
 'use client'
 
-import Link from 'next/link'
-
 export interface GuideStub {
   slug:      string
   title:     string
@@ -14,8 +12,8 @@ interface RelatedGuidesProps {
 }
 
 /**
- * RelatedGuides — compact list of guide links for pillar pages.
- * Shows a lock icon for premium guides.
+ * RelatedGuides — shows upcoming guides as a teaser section.
+ * Guides are currently disabled (feature coming soon).
  */
 export default function RelatedGuides({ guides, eyebrowLabel = 'Guides' }: RelatedGuidesProps) {
   if (guides.length === 0) return null
@@ -31,11 +29,32 @@ export default function RelatedGuides({ guides, eyebrowLabel = 'Guides' }: Relat
           <h2>Hands-on guides for this pillar</h2>
         </div>
 
+        {/* Upcoming banner */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          background: 'rgba(242,181,68,0.07)',
+          border: '1px solid rgba(242,181,68,0.3)',
+          borderRadius: 'var(--radius)',
+          padding: '12px 18px',
+          marginBottom: 24,
+        }}>
+          <span style={{ fontSize: '1.1rem' }}>🚧</span>
+          <span style={{
+            fontSize: '0.84rem',
+            color: 'var(--lane-coming)',
+            fontFamily: '"IBM Plex Mono", monospace',
+            letterSpacing: '0.02em',
+          }}>
+            <strong>Upcoming feature</strong> — Hands-on guides are currently in development and will launch soon on this community hub.
+          </span>
+        </div>
+
         <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {guides.map(guide => (
-            <Link
+            <div
               key={guide.slug}
-              href={`/guides/${guide.slug}`}
               style={{
                 display:      'flex',
                 alignItems:   'center',
@@ -44,41 +63,31 @@ export default function RelatedGuides({ guides, eyebrowLabel = 'Guides' }: Relat
                 borderRadius: 'var(--radius)',
                 background:   'var(--panel)',
                 padding:      '16px 18px',
-                transition:   'border-color 0.2s, transform 0.2s',
+                opacity:      0.55,
+                cursor:       'default',
+                userSelect:   'none',
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--azure)'
-                e.currentTarget.style.transform   = 'translateY(-2px)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--line)'
-                e.currentTarget.style.transform   = 'translateY(0)'
-              }}
+              title="Coming soon"
             >
-              <span style={{
-                fontSize: '1rem',
-                flexShrink: 0,
-                color: guide.isPremium ? 'var(--lane-coming)' : 'var(--azure)',
-              }}>
-                {guide.isPremium ? '🔒' : '▶'}
+              <span style={{ fontSize: '1rem', flexShrink: 0, color: 'var(--text-muted)' }}>
+                📋
               </span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 500, flex: 1 }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 500, flex: 1, color: 'var(--text-muted)' }}>
                 {guide.title}
               </span>
-              {guide.isPremium && (
-                <span style={{
-                  fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '0.68rem',
-                  color: 'var(--lane-coming)',
-                  border: '1px solid var(--lane-coming)',
-                  borderRadius: 4,
-                  padding: '2px 6px',
-                  flexShrink: 0,
-                }}>
-                  PREMIUM
-                </span>
-              )}
-            </Link>
+              <span style={{
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: '0.65rem',
+                color: 'var(--lane-coming)',
+                border: '1px solid rgba(242,181,68,0.4)',
+                borderRadius: 4,
+                padding: '2px 6px',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}>
+                COMING SOON
+              </span>
+            </div>
           ))}
         </div>
       </div>

@@ -2,16 +2,7 @@ import Link from 'next/link'
 import type { Lane, Pillar } from '@/lib/design-tokens'
 import { laneLabels } from '@/lib/design-tokens'
 
-export interface PulseItem {
-  id:          string
-  title:       string
-  summary:     string
-  lane:        Lane
-  pillar:      Pillar
-  sourceUrl:   string
-  sourceName:  string
-  publishedAt: string   // ISO string or relative label e.g. "2d ago"
-}
+import type { PulseItem } from '@/lib/seed-pulse'
 
 // ── PulseCard ──────────────────────────────────────────────
 export function PulseCard({ item }: { item: PulseItem }) {
@@ -19,7 +10,7 @@ export function PulseCard({ item }: { item: PulseItem }) {
   const pillarShort  = pillarShortLabel(item.pillar)
 
   return (
-    <Link href={item.sourceUrl} target="_blank" rel="nofollow noopener noreferrer"
+    <Link href={`/pulse/${item.id}`}
       className="pulse-card" style={{ display: 'block' }}>
       <h4>{item.title}</h4>
       <p>{item.summary}</p>
@@ -92,7 +83,7 @@ function formatRelative(iso: string): string {
 
 function pillarShortLabel(pillar: Pillar): string {
   const map: Record<Pillar, string> = {
-    'd365-fo':                    'D365 F&O',
+    'd365-fo':                    'D365 ERP',
     'dataverse-power-platform':   'Power Platform',
     'copilot-ai-agents':          'Copilot & AI Agents',
     'industry-solutions':         'Industry Solutions',

@@ -103,8 +103,47 @@ a {
   50%       { transform: translate(-50px, 30px); }
 }
 @keyframes drift3 {
-  0%, 100% { transform: translate(0, 0); }
-  50%       { transform: translate(30px, -40px); }
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  33%      { transform: translate(-10%, -15%) scale(0.95); }
+  66%      { transform: translate(-15%, 5%) scale(1.05); }
+}
+
+/* ── Markdown Content Typography ── */
+.pulse-detail-content .blog-content p, 
+.pulse-detail-content .demo-content p {
+  margin-bottom: 1.25em;
+}
+.pulse-detail-content .blog-content p:last-child,
+.pulse-detail-content .demo-content p:last-child {
+  margin-bottom: 0;
+}
+.pulse-detail-content strong {
+  font-weight: 600;
+  color: var(--text);
+}
+.pulse-detail-content h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  color: var(--text);
+}
+.pulse-detail-content .demo-content h3:first-child {
+  margin-top: 0;
+}
+.pulse-detail-content ol, .pulse-detail-content ul {
+  margin-bottom: 1.25em;
+  padding-left: 1.5em;
+}
+.pulse-detail-content li {
+  margin-bottom: 0.5em;
+}
+.pulse-detail-content code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
 }
 
 /* ─── Reduced motion ─── */

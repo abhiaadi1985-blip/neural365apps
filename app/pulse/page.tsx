@@ -1,27 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PulseGrid } from '@/components/pulse-grid'
-import type { PulseItem } from '@/components/pulse-grid'
+import type { PulseItem } from '@/lib/seed-pulse'
 import { landing } from '@/app/copy'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
-  title: 'The Pulse — neural365apps',
+  title: 'The Pulse — neural365 COMMUNITY',
   description: 'Full filterable feed of Microsoft Dynamics 365, Power Platform, and Copilot AI feature updates — new, coming, and architecture shifts.',
 }
 
-// Seed data — same 9 cards as landing, seeded for layout validation.
-// Live data will come from /api/pulse once Hermes is running.
-const SEED: PulseItem[] = [
-  { id: '1', lane: 'new',          pillar: 'd365-fo',                  title: 'Finance Copilot: variance narratives',     summary: 'Auto-generated written explanations for budget-to-actual variances, surfaced directly in the workspace.', sourceUrl: '#', sourceName: 'Microsoft Learn',  publishedAt: '2d ago'  },
-  { id: '2', lane: 'new',          pillar: 'dataverse-power-platform', title: 'Dataverse generative answers GA',           summary: 'Generally available grounding over Dataverse tables for Copilot Studio agents, no plug-in required.',       sourceUrl: '#', sourceName: 'Microsoft Blog',  publishedAt: '3d ago'  },
-  { id: '3', lane: 'new',          pillar: 'd365-fo',                  title: 'Supply Chain anomaly alerts',              summary: 'Real-time exception flags for inventory and demand forecasts, tuned per warehouse.',                         sourceUrl: '#', sourceName: 'Release Wave',   publishedAt: '3d ago'  },
-  { id: '4', lane: 'coming',       pillar: 'copilot-ai-agents',        title: 'Autonomous reconciliation agents',         summary: 'Preview agents that propose and explain journal matches, with a human approval step before posting.',          sourceUrl: '#', sourceName: 'Roadmap',        publishedAt: 'roadmap' },
-  { id: '5', lane: 'coming',       pillar: 'dataverse-power-platform', title: 'Cross-app agent handoffs',                summary: 'An agent started in Power Apps that can hand off context to a Copilot Studio agent mid-task.',                sourceUrl: '#', sourceName: 'Roadmap',        publishedAt: 'roadmap' },
-  { id: '6', lane: 'coming',       pillar: 'industry-solutions',       title: 'Industry agent templates: Manufacturing',  summary: 'Pre-built agent scaffolds for shop-floor exception handling and planner co-review.',                           sourceUrl: '#', sourceName: 'Roadmap',        publishedAt: 'roadmap' },
-  { id: '7', lane: 'architecture', pillar: 'dataverse-power-platform', title: 'Fabric-linked retention defaults',        summary: 'Long-term Dataverse retention now flows through Fabric-managed policies by default for new environments.',      sourceUrl: '#', sourceName: 'Microsoft Learn',  publishedAt: '5d ago'  },
-  { id: '8', lane: 'architecture', pillar: 'd365-fo',                  title: 'Unified dev environment changes',          summary: 'Build and deploy pipeline updates for the unified D365 developer experience, fewer manual sync steps.',         sourceUrl: '#', sourceName: 'Microsoft Blog',  publishedAt: '6d ago'  },
-  { id: '9', lane: 'architecture', pillar: 'dataverse-power-platform', title: 'Virtual table connector limits',           summary: 'Updated throughput guidance for virtual tables against high-volume external systems.',                          sourceUrl: '#', sourceName: 'Microsoft Learn',  publishedAt: '1w ago'  },
-]
+import { SEED_PULSE } from '@/lib/seed-pulse'
 
 const PILLARS = [
   { value: 'all',                       label: 'All pillars' },
@@ -37,6 +27,8 @@ const LANES = [
   { value: 'architecture', label: 'Architecture Shifts' },
 ]
 
+export const dynamic = 'force-dynamic'
+
 // This is a Server Component; filter state is passed via searchParams
 export default async function PulsePage({
   searchParams,
@@ -47,10 +39,36 @@ export default async function PulsePage({
   const activePillar = params.pillar ?? 'all'
   const activeLane   = params.lane   ?? 'all'
 
-  const filtered = SEED.filter(item =>
-    (activePillar === 'all' || item.pillar === activePillar) &&
-    (activeLane   === 'all' || item.lane   === activeLane)
-  )
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  
+  let query = supabase
+    .from('pulse_items')
+    .select('*')
+    // For now we don't filter by status='live' because we want to see everything during testing
+    .order('published_at', { ascending: false })
+    
+  if (activePillar !== 'all') {
+    query = query.eq('pillar', activePillar)
+  }
+  if (activeLane !== 'all') {
+    query = query.eq('lane', activeLane)
+  }
+
+  const { data, error } = await query
+  
+  // If Supabase returns no data (table empty / not yet migrated), fall back to seed data
+  // so the page never shows blank while the DB is being set up
+  let dbItems = data || []
+  
+  if (dbItems.length === 0) {
+    dbItems = SEED_PULSE.filter(item =>
+      (activePillar === 'all' || item.pillar === activePillar) &&
+      (activeLane   === 'all' || item.lane   === activeLane)
+    ) as typeof dbItems
+  }
+  
+  const filtered = dbItems
 
   return (
     <>

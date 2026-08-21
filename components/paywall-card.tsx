@@ -1,34 +1,24 @@
-import Link from 'next/link'
-
-interface PaywallCardProps {
-  tier?:    string
-  ctaHref?: string
-}
-
-export default function PaywallCard({
-  tier    = 'Premium',
-  ctaHref = '/sign-up',
-}: PaywallCardProps) {
+/**
+ * PaywallCard — temporarily replaced with an "Upcoming" state card.
+ * Stripe/premium features are disabled for the current launch phase.
+ */
+export default function PaywallCard() {
   return (
     <div style={{
-      border:       '1px solid var(--azure)',
+      border:       '1px solid rgba(242,181,68,0.35)',
       borderRadius: 'var(--radius)',
-      background:   'var(--panel)',
+      background:   'rgba(242,181,68,0.05)',
       padding:      32,
       textAlign:    'center',
-      boxShadow:    '0 0 40px rgba(47,134,255,0.12)',
       maxWidth:     480,
       margin:       '40px auto',
     }}>
-      <div style={{ fontSize: '2rem', marginBottom: 12 }}>🔒</div>
-      <h3 style={{ marginBottom: 8 }}>{tier} content</h3>
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: 24 }}>
-        This guide is available to {tier.toLowerCase()} members. Unlock interactive walkthroughs,
-        inline Neural Shorts, and Micro-podcasts.
+      <div style={{ fontSize: '2rem', marginBottom: 12 }}>🚧</div>
+      <h3 style={{ marginBottom: 8, color: 'var(--lane-coming)' }}>Coming Soon</h3>
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: 0 }}>
+        Hands-on guides and premium content are currently in development.
+        This section will be available in an upcoming release of the neural365 Community hub.
       </p>
-      <Link href={ctaHref} className="btn btn-primary">
-        Unlock {tier} Access
-      </Link>
     </div>
   )
 }

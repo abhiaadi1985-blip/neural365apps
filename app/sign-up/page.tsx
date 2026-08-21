@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Create Account — neural365apps',
-  description: 'Create your neural365apps account to unlock premium D365 & Power Platform guides.',
+  title: 'Create Account — neural365 COMMUNITY',
+  description: 'Create your neural365 COMMUNITY account to unlock premium D365 & Power Platform guides.',
 }
 
 export default function SignUpPage() {
@@ -16,7 +16,7 @@ export default function SignUpPage() {
       }}>
         <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: 8 }}>Create your account</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 28 }}>
-          Join the neural365apps community. Free to start.
+          Join the neural365 COMMUNITY. Free to start.
         </p>
 
         <form action="/api/auth/sign-up" method="POST" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

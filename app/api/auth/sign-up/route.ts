@@ -5,15 +5,23 @@ import { cookies } from 'next/headers'
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  let email: string, password: string
-  try {
-    const body = await req.json()
-    email    = (body.email    ?? '').trim()
-    password = (body.password ?? '')
-  } catch {
+  let email = ''
+  let password = ''
+  const contentType = req.headers.get('content-type') || ''
+  if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+
     const form = await req.formData().catch(() => null)
-    email    = ((form?.get('email')    as string) ?? '').trim()
+    email = ((form?.get('email') as string) ?? '').trim()
     password = ((form?.get('password') as string) ?? '')
+  } else {
+    try {
+      const body = await req.json()
+      email = (body.email ?? '').trim()
+      password = (body.password ?? '')
+    } catch {
+      email = ''
+      password = ''
+    }
   }
 
   if (!email || !password) {
@@ -27,7 +35,7 @@ export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll: () => cookieStore.getAll(),

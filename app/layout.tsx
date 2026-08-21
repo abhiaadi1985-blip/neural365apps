@@ -25,7 +25,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'neural365apps — Master Microsoft AI Agents & ERP, hands-on',
+  title: 'neural365 COMMUNITY — Master Microsoft AI Agents & ERP, hands-on',
   description:
     'Your ultimate independent community hub for upcoming Dynamics 365, Dataverse, and Power Platform AI features. Interactive guides, video shorts, and micro-podcasts.',
   keywords: [
@@ -33,11 +33,11 @@ export const metadata: Metadata = {
     'Dataverse', 'Microsoft', 'ERP', 'community hub',
   ],
   openGraph: {
-    title: 'neural365apps — Master Microsoft AI Agents & ERP, hands-on',
+    title: 'neural365 COMMUNITY — Master Microsoft AI Agents & ERP, hands-on',
     description:
       'Interactive guides, Neural Shorts, and Micro-podcasts for the D365 & Power Platform ecosystem.',
     type: 'website',
-    siteName: 'neural365apps',
+    siteName: 'neural365 COMMUNITY',
   },
 }
 
@@ -48,8 +48,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${sora.variable} ${ibmPlexMono.variable}`}
+      suppressHydrationWarning
     >
-      <body>
+      <body suppressHydrationWarning>
         <Nav />
         <main>{children}</main>
         <Footer />

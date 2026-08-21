@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Sign In — neural365apps',
-  description: 'Sign in to your neural365apps account to access premium guides.',
+  title: 'Sign In — neural365 COMMUNITY',
+  description: 'Sign in to your neural365 COMMUNITY account to access premium guides.',
 }
 
 export default function SignInPage() {

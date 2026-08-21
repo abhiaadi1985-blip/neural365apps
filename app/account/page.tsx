@@ -1,19 +1,22 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
-  title: 'My Account — neural365apps',
-  description: 'Manage your neural365apps account and subscription.',
+  title: 'My Account — neural365 COMMUNITY',
+  description: 'Manage your neural365 COMMUNITY account and subscription.',
 }
 
-// This is a Server Component — auth state comes from Supabase server client.
-// Full auth integration requires real Supabase credentials in .env.local.
 export default async function AccountPage() {
-  // Placeholder until real auth session is wired up with env vars
-  const user = null
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  
+  const { data: { user } } = await supabase.auth.getUser()
   const subscription = null
 
   if (!user) {
+
     return (
       <section style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>
         <div style={{
@@ -37,12 +40,18 @@ export default async function AccountPage() {
         <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: 32 }}>My Account</h1>
 
         {/* Profile */}
-        <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', background: 'var(--panel)', padding: 28, marginBottom: 20 }}>
-          <h2 style={{ fontSize: '0.78rem', marginBottom: 16, color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Profile
-          </h2>
-          <p style={{ fontSize: '0.9rem' }}>Email: <strong>{(user as { email?: string })?.email}</strong></p>
+        <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', background: 'var(--panel)', padding: 28, marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ fontSize: '0.78rem', marginBottom: 12, color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Profile
+            </h2>
+            <p style={{ fontSize: '0.9rem' }}>Email: <strong>{user.email}</strong></p>
+          </div>
+          <form action="/api/auth/sign-out" method="POST">
+            <button type="submit" className="btn btn-secondary btn-sm">Sign Out</button>
+          </form>
         </div>
+
 
         {/* Subscription */}
         <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', background: 'var(--panel)', padding: 28 }}>
