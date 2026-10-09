@@ -145,6 +145,48 @@ export default async function PulseDetailPage({
 
           {/* Main content */}
           <div className="pulse-detail-content">
+            {/* Embedded Media Players */}
+            {item.podcast_audio_url && (
+              <div style={{
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--radius)',
+                padding: '20px 24px',
+                marginBottom: 32,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--azure)' }}>
+                  <span>🎙️</span>
+                  <span style={{ fontWeight: 600 }}>MICRO-PODCAST (2-MIN AI DEBRIEF)</span>
+                </div>
+                <audio controls style={{ width: '100%' }} key={item.podcast_audio_url}>
+                  <source src={item.podcast_audio_url} type="audio/mpeg" />
+                  Your browser does not support audio playback.
+                </audio>
+              </div>
+            )}
+
+            {item.short_video_url && (
+              <div style={{
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--radius)',
+                padding: '20px 24px',
+                marginBottom: 32,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--lane-new)', marginBottom: 12 }}>
+                  <span>🎬</span>
+                  <span style={{ fontWeight: 600 }}>NEURAL SHORT DEMO (HANDS-ON WALKTHROUGH)</span>
+                </div>
+                <video controls style={{ width: '100%', maxHeight: 420, borderRadius: 8, background: '#000' }} key={item.short_video_url}>
+                  <source src={item.short_video_url} type="video/mp4" />
+                  Your browser does not support video playback.
+                </video>
+              </div>
+            )}
+
             {item.content_md ? (
               <div className="blog-content" style={{ fontSize: '1.05rem', lineHeight: 1.75, color: 'var(--text)', marginBottom: 32 }}>
                 <ReactMarkdown>{item.content_md}</ReactMarkdown>

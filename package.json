@@ -10,7 +10,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "hermes": "npx tsx worker/hermes/run.ts",
+    "media-worker": "npx tsx worker/media/generate-podcasts.ts"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.8.0",

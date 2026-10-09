@@ -13,6 +13,10 @@ export interface PulseItem {
   // New fields for the Hermes long-form blog pipeline
   content_md?: string
   demo_scenario_md?: string
+
+  // Media URLs
+  podcast_audio_url?: string
+  short_video_url?: string
 }
 
 /**

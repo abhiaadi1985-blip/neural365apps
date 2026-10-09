@@ -39,7 +39,7 @@ nano .env.local
 
 Required variables:
 - `NEXT_PUBLIC_SUPABASE_URL` — your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — public anon key (safe for client)
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — public publishable key (safe for client)
 - `SUPABASE_SERVICE_ROLE_KEY` — **server-only**, never expose
 - `STRIPE_SECRET_KEY` — Stripe secret key
 - `STRIPE_WEBHOOK_SECRET` — from `stripe listen` or Stripe dashboard

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
 export const runtime = 'nodejs'
 
@@ -8,14 +9,19 @@ export const runtime = 'nodejs'
 
 interface IngestPayload {
   items: {
-    title:        string
-    summary:      string
-    lane:         'new' | 'coming' | 'architecture'
-    pillar:       'copilot-ai-agents' | 'd365-fo' | 'dataverse-power-platform' | 'industry-solutions'
-    source_name:  string
-    source_url:   string
-    published_at: string   // ISO 8601
-    dedupe_hash:  string
+    title:              string
+    summary:            string
+    lane:               'new' | 'coming' | 'architecture'
+    pillar:             'copilot-ai-agents' | 'd365-fo' | 'dataverse-power-platform' | 'industry-solutions'
+    source_name:        string
+    source_url:         string
+    published_at:       string   // ISO 8601
+    dedupe_hash:        string
+    content_md?:        string
+    demo_scenario_md?:  string
+    status?:            'draft' | 'media_pending' | 'live'
+    podcast_audio_url?: string
+    short_video_url?:   string
   }[]
 }
 
@@ -40,7 +46,8 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Insert with dedupe (conflict = skip) ───────────────────────────────
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
   const { data, error } = await supabase
     .from('pulse_items')
     .upsert(payload.items, { onConflict: 'dedupe_hash', ignoreDuplicates: true })

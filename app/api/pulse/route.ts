@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
 export const runtime = 'nodejs'
 
@@ -12,7 +13,8 @@ export async function GET(req: NextRequest) {
   const source = searchParams.get('source') ?? undefined
   const page   = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10))
 
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
 
 
   let query = supabase

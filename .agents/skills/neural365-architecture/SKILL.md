@@ -83,9 +83,9 @@ confirmed        boolean default false
 subscribed_topics text[]  -- array of pillar slugs, defaults to all 4
 ```
 
-## Admin Middleware Protection
+## Admin Proxy Protection
 
-Root `middleware.ts` intercepts `/admin/*` routes (except `/admin/login`):
+Root `proxy.ts` (Next.js 16 convention, replaces `middleware.ts`) intercepts `/admin/*` routes (except `/admin/login`):
 1. Creates Supabase client from request cookies
 2. Calls `supabase.auth.getUser()` — if no user, redirect to `/admin/login`
 3. Queries `profiles` for `role = 'admin'` — if not admin, sign out and redirect
