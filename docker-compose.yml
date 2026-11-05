@@ -6,12 +6,18 @@ services:
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
-    container_name: neural365-web
+    container_name: community-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:${PORT:-3000}:3000"
     env_file:
       - .env.local
     environment:
       - PORT=3000
       - HOSTNAME=0.0.0.0
+    networks:
+      - shared-net
+
+networks:
+  shared-net:
+    external: true
