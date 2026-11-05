@@ -12,7 +12,12 @@
     "start": "next start",
     "lint": "eslint",
     "hermes": "npx tsx worker/hermes/run.ts",
-    "media-worker": "npx tsx worker/media/generate-podcasts.ts"
+    "media-worker": "npx tsx worker/media/generate-podcasts.ts",
+    "clean-audio": ".venv\\Scripts\\python scripts/1_clean_aroll.py",
+    "tts": ".venv\\Scripts\\python scripts/2_local_tts.py",
+    "preview-broll": "npx hyperframes preview scenes",
+    "render-broll": "npx hyperframes render scenes -o assets/broll/template-showcase.mp4",
+    "build-video": ".venv\\Scripts\\python scripts/3_assemble_video.py"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.8.0",
@@ -25,12 +30,19 @@
     "stripe": "^22.2.3"
   },
   "devDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@remotion/bundler": "^4.0.535",
+    "@remotion/cli": "^4.0.535",
+    "@remotion/player": "^4.0.535",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "hyperframes": "^0.8.214",
+    "remotion": "^4.0.535",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

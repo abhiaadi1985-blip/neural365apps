@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+  <title>Neural365 Shorts #NS03 — D365 Procurement Agent Impact Analysis</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #06090F;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #F8FAFC;
+      position: relative;
+    }
+
+    /* Ambient dynamic glows */
+    .ambient-glow-top {
+      position: absolute;
+      top: -200px;
+      left: 10%;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(60px);
+    }
+
+    .ambient-glow-bottom {
+      position: absolute;
+      bottom: -200px;
+      right: 10%;
+      width: 900px;
+      height: 900px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.10) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(80px);
+    }
+
+    /* Grid overlay texture */
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* 3-Band Root Layout */
+    #root {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* ==========================================================================
+       TOP BAND (Fixed Header, Y: 0 to 240px)
+       ========================================================================== */
+    .top-band {
+      height: 240px;
+      padding: 60px 60px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 16px;
+      z-index: 50;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #94A3B8;
+      text-transform: uppercase;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #38BDF8;
+      box-shadow: 0 0 12px #38BDF8;
+    }
+
+    /* Mandatory Amber PUBLIC PREVIEW Chip */
+    .status-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.12em;
+      padding: 8px 22px;
+      border-radius: 9999px;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1.5px solid rgba(245, 158, 11, 0.6);
+      color: #F59E0B;
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.35);
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #F59E0B;
+      box-shadow: 0 0 10px #F59E0B;
+      animation: pulse-amber 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-amber {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .topic-crumbs {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 19px;
+      font-weight: 600;
+      color: #64748B;
+      letter-spacing: 0.05em;
+    }
+
+    .topic-crumbs span.active {
+      color: #38BDF8;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       MID BAND (Stage for Visual Archetypes, Y: 240px to 1640px)
+       ========================================================================== */
+    .mid-band {
+      position: absolute;
+      top: 240px;
+      left: 60px;
+      right: 60px;
+      height: 1380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* Common Card Styling */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 1: Kinetic Headline & Delay Notification (kinetic_headline)
+       -------------------------------------------------------------------------- */
+    .b1-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    .b1-headline {
+      font-size: 68px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+    }
+
+    .b1-headline .highlight-amber {
+      color: #F59E0B;
+      text-shadow: 0 0 35px rgba(245, 158, 11, 0.4);
+    }
+
+    .b1-headline .highlight-cyan {
+      color: #38BDF8;
+      text-shadow: 0 0 35px rgba(56, 189, 248, 0.4);
+    }
+
+    .vendor-email-card {
+      padding: 44px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+    }
+
+    .page-title-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .vendor-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .po-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 38px;
+      font-weight: 800;
+      color: #F1F5F9;
+    }
+
+    .vendor-badge {
+      font-size: 22px;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #E2E8F0;
+    }
+
+    .delay-alert-box {
+      padding: 24px;
+      border-radius: 18px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .delay-text {
+      font-size: 26px;
+      font-weight: 700;
+      color: #F87171;
+    }
+
+    .delay-days {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 800;
+      color: #EF4444;
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 2: Marking & Pegging Traversal (lane_stack)
+       -------------------------------------------------------------------------- */
+    .b2-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .section-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: #38BDF8;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .lane-item {
+      padding: 30px 36px;
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .lane-item.active-glow {
+      border-color: #38BDF8;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
+      background: rgba(30, 41, 59, 0.9);
+    }
+
+    .lane-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .lane-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 800;
+      color: #64748B;
+      width: 40px;
+    }
+
+    .lane-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #F8FAFC;
+    }
+
+    .lane-desc {
+      font-size: 20px;
+      color: #94A3B8;
+      margin-top: 4px;
+    }
+
+    .lane-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .lane-connector {
+      width: 4px;
+      height: 22px;
+      background: rgba(56, 189, 248, 0.4);
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 3: Inventory Trajectory Graph & Breach (doc_reader)
+       -------------------------------------------------------------------------- */
+    .b3-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .graph-card {
+      padding: 44px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .graph-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .loc-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      color: #94A3B8;
+    }
+
+    .graph-canvas {
+      width: 100%;
+      height: 480px;
+      position: relative;
+      background: rgba(2, 6, 23, 0.6);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .safety-threshold-line {
+      position: absolute;
+      top: 200px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      border-top: 2px dashed #EF4444;
+    }
+
+    .threshold-label {
+      position: absolute;
+      top: 165px;
+      right: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #EF4444;
+      background: rgba(239, 68, 68, 0.1);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .zero-line {
+      position: absolute;
+      top: 360px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .zero-label {
+      position: absolute;
+      top: 365px;
+      left: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      color: #64748B;
+    }
+
+    .inventory-breach-callout {
+      padding: 24px 30px;
+      border-radius: 18px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1.5px solid rgba(239, 68, 68, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breach-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #FCA5A5;
+    }
+
+    .breach-sub {
+      font-size: 19px;
+      color: #CBD5E1;
+      margin-top: 4px;
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 4: D365 Action Pane & Simulation Form (ui_form_demo)
+       -------------------------------------------------------------------------- */
+    .b4-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .ribbon-menu {
+      padding: 22px 32px;
+      background: #1E293B;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+    }
+
+    .ribbon-item.active {
+      color: #38BDF8;
+      font-weight: 700;
+      border-bottom: 3px solid #38BDF8;
+      padding-bottom: 4px;
+    }
+
+    .sim-card {
+      padding: 44px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form-label {
+      font-size: 20px;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+
+    .form-input {
+      padding: 20px 24px;
+      border-radius: 14px;
+      background: rgba(2, 6, 23, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      color: #F8FAFC;
+    }
+
+    .sim-button {
+      padding: 24px;
+      border-radius: 16px;
+      background: #0284C7;
+      border: none;
+      color: #FFFFFF;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 0 35px rgba(2, 132, 199, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      position: relative;
+    }
+
+    .cursor-pointer-sim {
+      position: absolute;
+      right: 40px;
+      bottom: -20px;
+      width: 44px;
+      height: 44px;
+      opacity: 0;
+    }
+
+    .safety-banner {
+      padding: 18px 24px;
+      border-radius: 14px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6EE7B7;
+      font-size: 19px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 5: Impacted Order Tree Payoff (ui_grid)
+       -------------------------------------------------------------------------- */
+    .b5-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .verdict-banner {
+      padding: 30px 40px;
+      border-radius: 24px;
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #EF4444;
+      box-shadow: 0 0 50px rgba(239, 68, 68, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .verdict-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 44px;
+      font-weight: 800;
+      color: #EF4444;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .view-details-link {
+      font-size: 22px;
+      font-weight: 700;
+      color: #38BDF8;
+      text-decoration: underline;
+    }
+
+    .tree-card {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .tree-node {
+      padding: 24px 28px;
+      border-radius: 18px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tree-node.risk-red {
+      border-color: rgba(239, 68, 68, 0.5);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .node-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #F8FAFC;
+    }
+
+    .node-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      color: #94A3B8;
+    }
+
+    .node-tag-danger {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 19px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: #EF4444;
+      color: #FFFFFF;
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 6: Copilot Studio Capacity Cost Model (stat_cards)
+       -------------------------------------------------------------------------- */
+    .b6-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .stat-card-row {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .cost-card {
+      padding: 40px;
+      border-radius: 24px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid rgba(56, 189, 248, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .cost-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38BDF8;
+      align-self: flex-start;
+    }
+
+    .cost-name {
+      font-size: 40px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .cost-driver {
+      font-size: 22px;
+      color: #94A3B8;
+    }
+
+    /* --------------------------------------------------------------------------
+       BEAT 7: Large Stacked Recap Pills & Final Logo Card (end_card)
+       -------------------------------------------------------------------------- */
+    .b7-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .recap-chips-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Stacked LARGE Recap Pills (44px text, 30/54px padding, glowing) */
+    .recap-chip {
+      font-size: 44px;
+      font-weight: 800;
+      padding: 30px 54px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
+      color: #FFFFFF;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .closing-tagline {
+      font-size: 42px;
+      font-weight: 700;
+      text-align: center;
+      color: #94A3B8;
+      line-height: 1.3;
+      margin-top: 20px;
+    }
+
+    /* Solo Neural365 Logo Card */
+    .final-logo-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 60;
+    }
+
+    .logo-container {
+      width: 220px;
+      height: 220px;
+      border-radius: 48px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+      border: 2px solid rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 80px rgba(56, 189, 248, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-wordmark {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 58px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: #FFFFFF;
+      text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+    }
+
+    .brand-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 26px;
+      font-weight: 600;
+      color: #38BDF8;
+      letter-spacing: 0.1em;
+    }
+
+    /* ==========================================================================
+       BOTTOM BAND (Captions & Progress, Y: 1640px to 1920px)
+       ========================================================================== */
+    .bottom-band {
+      height: 280px;
+      padding: 20px 60px 60px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      position: relative;
+    }
+
+    .caption-pill {
+      font-size: 38px;
+      font-weight: 700;
+      padding: 18px 42px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      max-width: 960px;
+      white-space: pre-wrap;
+      line-height: 1.25;
+      opacity: 0;
+    }
+
+    .caption-pill .hl {
+      color: #38BDF8;
+    }
+  </style>
+</head>
+<body>
+  <!-- 3-Band Root Composition Container -->
+  <div id="root" data-composition-id="ns03" data-width="1080" data-height="1920" data-duration="81" data-fps="30">
+    <!-- Ambient Background Lighting -->
+    <div class="ambient-glow-top"></div>
+    <div class="ambient-glow-bottom"></div>
+    <div class="grid-lines"></div>
+    
+    <!-- TOP BAND -->
+    <header class="top-band">
+      <div class="header-row">
+        <div class="brand-badge">
+          <div class="brand-dot"></div>
+          <span>NEURAL365</span>
+          <span style="color: #475569;">/</span>
+          <span>SHORTS #NS03</span>
+        </div>
+        <!-- Status Chip: PUBLIC PREVIEW (Amber) -->
+        <div class="status-chip">
+          <div class="status-dot"></div>
+          <span>PUBLIC PREVIEW</span>
+        </div>
+      </div>
+      <div class="topic-crumbs">
+        <span>DYNAMICS 365 SUPPLY CHAIN</span>
+        <span>&rsaquo;</span>
+        <span class="active">PROCUREMENT AGENT IMPACT ANALYSIS</span>
+      </div>
+    </header>
+
+    <!-- MID BAND STAGES -->
+    <main class="mid-band">
+
+      <!-- BEAT 1 STAGE (kinetic_headline) -->
+      <section class="stage" id="stage-beat-1">
+        <div class="b1-container">
+          <h1 class="b1-headline">
+            Your supplier delays a PO.<br>
+            <span class="highlight-cyan">The agent already knows</span><br>
+            <span class="highlight-amber">who gets hurt.</span>
+          </h1>
+
+          <div class="glass-card vendor-email-card" id="b1-email-card">
+            <div class="page-title-label">
+              <span>(Preview) Emails from vendors</span>
+            </div>
+            <div class="vendor-row">
+              <span class="po-tag">PO-00842</span>
+              <span class="vendor-badge">Fabrikam Supply</span>
+            </div>
+            <div class="delay-alert-box">
+              <span class="delay-text">Delivery Date Delayed</span>
+              <span class="delay-days">+5 Days</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BEAT 2 STAGE (lane_stack) -->
+      <section class="stage" id="stage-beat-2">
+        <div class="b2-container">
+          <div class="section-eyebrow">Automated Lineage Traversal</div>
+          
+          <div class="lane-item" id="lane-1">
+            <div class="lane-left">
+              <div class="lane-number">01</div>
+              <div>
+                <div class="lane-title">Purchase Order PO-00842</div>
+                <div class="lane-desc">Incoming supply from Fabrikam</div>
+              </div>
+            </div>
+            <div class="lane-badge">SLIPPED</div>
+          </div>
+
+          <div class="lane-connector"></div>
+
+          <div class="lane-item" id="lane-2">
+            <div class="lane-left">
+              <div class="lane-number">02</div>
+              <div>
+                <div class="lane-title">Marking & Pegging Engine</div>
+                <div class="lane-desc">SCM Dynamic Master Planning</div>
+              </div>
+            </div>
+            <div class="lane-badge">TRACING</div>
+          </div>
+
+          <div class="lane-connector"></div>
+
+          <div class="lane-item" id="lane-3">
+            <div class="lane-left">
+              <div class="lane-number">03</div>
+              <div>
+                <div class="lane-title">Production Order PRD-0410</div>
+                <div class="lane-desc">Assembly Line 3 Schedule</div>
+              </div>
+            </div>
+            <div class="lane-badge">AT RISK</div>
+          </div>
+
+          <div class="lane-connector"></div>
+
+          <div class="lane-item" id="lane-4">
+            <div class="lane-left">
+              <div class="lane-number">04</div>
+              <div>
+                <div class="lane-title">Customer Sales Order SO-00902</div>
+                <div class="lane-desc">Downstream delivery commitment</div>
+              </div>
+            </div>
+            <div class="lane-badge">IMPACTED</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BEAT 3 STAGE (doc_reader) -->
+      <section class="stage" id="stage-beat-3">
+        <div class="b3-container">
+          <div class="glass-card graph-card">
+            <div class="graph-header">
+              <span class="section-eyebrow">Projected Inventory Analysis</span>
+              <span class="loc-tag">Site 1 / Warehouse 11</span>
+            </div>
+
+            <div class="graph-canvas">
+              <div class="safety-threshold-line"></div>
+              <div class="threshold-label">Minimum Safety Threshold: 200</div>
+
+              <div class="zero-line"></div>
+              <div class="zero-label">0 On-Hand (Stockout)</div>
+
+              <!-- SVG Trajectory Curve -->
+              <svg width="100%" height="100%" viewBox="0 0 860 480" style="position:absolute; inset:0;">
+                <defs>
+                  <linearGradient id="curveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#EF4444" stop-opacity="0.1"/>
+                  </linearGradient>
+                </defs>
+                <!-- Baseline planned trajectory -->
+                <path d="M 40 100 Q 250 120 450 140 T 820 150" fill="none" stroke="#64748B" stroke-width="3" stroke-dasharray="6 6"/>
+                <!-- Proposed delayed trajectory plunging into negative -->
+                <path id="delayed-curve" d="M 40 100 Q 250 120 420 220 Q 560 320 800 420" fill="none" stroke="#EF4444" stroke-width="5"/>
+              </svg>
+            </div>
+
+            <div class="inventory-breach-callout" id="b3-breach-callout">
+              <div>
+                <div class="breach-title">THRESHOLD BREACH CONFIRMED</div>
+                <div class="breach-sub">Projected on-hand drops to -45 units on May 15</div>
+              </div>
+              <div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:800; color:#EF4444;">-45 EA</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BEAT 4 STAGE (ui_form_demo) -->
+      <section class="stage" id="stage-beat-4">
+        <div class="b4-container">
+          <div class="ribbon-menu">
+            <span>Action Pane</span>
+            <span>&rsaquo;</span>
+            <span>Purchase Order</span>
+            <span>&rsaquo;</span>
+            <span class="ribbon-item active">Simulate purchase order changes</span>
+          </div>
+
+          <div class="glass-card sim-card">
+            <div class="form-row">
+              <label class="form-label">Confirmed receipt date (Simulated)</label>
+              <div class="form-input">May 17, 2026</div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Line Quantity</label>
+              <div class="form-input">150 units (Partial Expedite)</div>
+            </div>
+
+            <div class="sim-button" id="sim-btn">
+              <span>Simulate impact</span>
+              <!-- Click Cursor -->
+              <svg class="cursor-pointer-sim" id="b4-cursor" viewBox="0 0 24 24" fill="#FFFFFF">
+                <path d="M7 2l12 11.5-5.5 1.5 3.5 7-3 1.5-3.5-7-3.5 3.5z"/>
+              </svg>
+            </div>
+
+            <div class="safety-banner">
+              Impact simulations don't change the actual purchase order or affect planning calculations.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BEAT 5 STAGE (ui_grid / Payoff) -->
+      <section class="stage" id="stage-beat-5">
+        <div class="b5-container">
+          <div class="verdict-banner" id="b5-verdict">
+            <div>
+              <div style="font-size: 20px; color: #FCA5A5; font-weight:700;">AGENT EVALUATION VERDICT</div>
+              <div class="verdict-badge">Has impact</div>
+            </div>
+            <a href="#" class="view-details-link">View details</a>
+          </div>
+
+          <div class="glass-card tree-card" id="b5-tree">
+            <div class="section-eyebrow">Tree of Impacted Orders</div>
+
+            <div class="tree-node">
+              <div>
+                <div class="node-title">Purchase Order PO-00842</div>
+                <div class="node-id">Fabrikam Supply · Delay +5d</div>
+              </div>
+              <span class="lane-badge">ORIGIN</span>
+            </div>
+
+            <div class="tree-node risk-red" id="tree-node-prd">
+              <div>
+                <div class="node-title">Production Order PRD-0410</div>
+                <div class="node-id">Assembly Line 3 · Material Shortage</div>
+              </div>
+              <span class="node-tag-danger">DELAYED</span>
+            </div>
+
+            <div class="tree-node risk-red" id="tree-node-so">
+              <div>
+                <div class="node-title">Sales Order SO-00902</div>
+                <div class="node-id">Customer: Contoso Retail · SLA Breach</div>
+              </div>
+              <span class="node-tag-danger">AT RISK</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BEAT 6 STAGE (stat_cards) -->
+      <section class="stage" id="stage-beat-6">
+        <div class="b6-container">
+          <div class="section-eyebrow">Capacity Architecture</div>
+
+          <div class="stat-card-row">
+            <div class="cost-card" id="cost-card-1">
+              <span class="cost-pill">FIXED RATE</span>
+              <div class="cost-name">Fixed Cost Per Run</div>
+              <div class="cost-driver">Billed in Copilot Studio credits per impact analysis execution</div>
+            </div>
+
+            <div class="cost-card" id="cost-card-2">
+              <span class="cost-pill">VARIABLE RATE</span>
+              <div class="cost-name">Variable Cost</div>
+              <div class="cost-driver">Scales directly with the number of line changes communicated</div>
+            </div>
+          </div>
+
+          <div style="font-family:'JetBrains Mono'; font-size:18px; color:#64748B; text-align:center;">
+            Primary Source: learn.microsoft.com/dynamics365/procurement-agent-impact-analysis
+          </div>
+        </div>
+      </section>
+
+      <!-- BEAT 7 STAGE (end_card) -->
+      <section class="stage" id="stage-beat-7">
+        <div class="b7-container" id="recap-box">
+          <div class="recap-chips-wrapper">
+            <div class="recap-chip" id="recap-1">
+              <span>Automated Pegging Traversal</span>
+            </div>
+            <div class="recap-chip" id="recap-2">
+              <span>Non-Destructive Simulation</span>
+            </div>
+            <div class="recap-chip" id="recap-3">
+              <span>Instant "Has impact" Verdict</span>
+            </div>
+          </div>
+
+          <div class="closing-tagline" id="closing-tagline">
+            Stop guessing your supply chain blast radius.<br>
+            Let the agent map the damage.
+          </div>
+        </div>
+      </section>
+
+      <!-- SOLO FINAL LOGO CARD -->
+      <div class="final-logo-stage" id="final-logo-stage">
+        <div class="logo-container">
+          <img src="assets/neural365-logo-mark@3x.png" alt="Neural365 Logo">
+        </div>
+        <div class="brand-wordmark">NEURAL365</div>
+        <div class="brand-url">neural365.com</div>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM BAND (Dynamic Synchronized Subtitles) -->
+    <footer class="bottom-band">
+      <div class="caption-pill" id="caption-pill"></div>
+    </footer>
+
+  </div>
+
+  <script>
+
+    // HyperFrames Standard Contract Timeline
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+    window.__timelines["ns03"] = tl;
+
+    // Subtitle Pill Cues
+    const captionEl = document.getElementById('caption-pill');
+    const CUES = [
+  {
+    "start": 0.0,
+    "end": 1.24,
+    "text": "A supply is just"
+  },
+  {
+    "start": 1.24,
+    "end": 3.28,
+    "text": "delayed purchase order 842"
+  },
+  {
+    "start": 3.28,
+    "end": 4.78,
+    "text": "by 5 days."
+  },
+  {
+    "start": 5.02,
+    "end": 5.96,
+    "text": "The purchase are usually"
+  },
+  {
+    "start": 5.96,
+    "end": 8.62,
+    "text": "spent hours chasing spreadsheets."
+  },
+  {
+    "start": 9.003,
+    "end": 9.703,
+    "text": "Instead,"
+  },
+  {
+    "start": 10.183,
+    "end": 12.063,
+    "text": "the procurement agent immediately"
+  },
+  {
+    "start": 12.063,
+    "end": 15.063,
+    "text": "traces marking and pegging"
+  },
+  {
+    "start": 15.063,
+    "end": 18.903,
+    "text": "chains across dynamics 365"
+  },
+  {
+    "start": 18.903,
+    "end": 21.143,
+    "text": "supply chain management to"
+  },
+  {
+    "start": 21.143,
+    "end": 23.563,
+    "text": "calculate the downstream blast"
+  },
+  {
+    "start": 23.563,
+    "end": 23.863,
+    "text": "radius."
+  },
+  {
+    "start": 24.248,
+    "end": 25.868,
+    "text": "It checks confirmed in"
+  },
+  {
+    "start": 25.868,
+    "end": 27.608,
+    "text": "coming supply against projected"
+  },
+  {
+    "start": 27.608,
+    "end": 28.728,
+    "text": "on -hand inventory."
+  },
+  {
+    "start": 29.368,
+    "end": 30.768,
+    "text": "Catching the exact day"
+  },
+  {
+    "start": 30.768,
+    "end": 32.488,
+    "text": "safety stock breaches minimum"
+  },
+  {
+    "start": 32.488,
+    "end": 34.308,
+    "text": "threshold and flips into"
+  },
+  {
+    "start": 34.308,
+    "end": 34.828,
+    "text": "a stockout."
+  },
+  {
+    "start": 35.21,
+    "end": 37.11,
+    "text": "Before accepting the supplier's"
+  },
+  {
+    "start": 37.11,
+    "end": 37.71,
+    "text": "new date,"
+  },
+  {
+    "start": 38.25,
+    "end": 39.37,
+    "text": "the purchaser runs an"
+  },
+  {
+    "start": 39.37,
+    "end": 41.25,
+    "text": "impact simulation to test"
+  },
+  {
+    "start": 41.25,
+    "end": 44.31,
+    "text": "expediting options without altering"
+  },
+  {
+    "start": 44.31,
+    "end": 45.85,
+    "text": "the live purchase order"
+  },
+  {
+    "start": 45.85,
+    "end": 47.57,
+    "text": "or planning calculations."
+  },
+  {
+    "start": 48.007,
+    "end": 49.527,
+    "text": "The agent returns a"
+  },
+  {
+    "start": 49.527,
+    "end": 51.607,
+    "text": "clear verdict has impact"
+  },
+  {
+    "start": 51.607,
+    "end": 54.107,
+    "text": "exposing every affected production"
+  },
+  {
+    "start": 54.107,
+    "end": 55.747,
+    "text": "job and customer sales"
+  },
+  {
+    "start": 55.747,
+    "end": 58.287,
+    "text": "order before anyone on"
+  },
+  {
+    "start": 58.287,
+    "end": 59.687,
+    "text": "the shop floor is"
+  },
+  {
+    "start": 59.687,
+    "end": 60.367,
+    "text": "caught off guard."
+  },
+  {
+    "start": 60.74,
+    "end": 61.82,
+    "text": "powered by co -pilot"
+  },
+  {
+    "start": 61.82,
+    "end": 63.24,
+    "text": "studio capacity,"
+  },
+  {
+    "start": 64.04,
+    "end": 65.48,
+    "text": "billing is structured around"
+  },
+  {
+    "start": 65.48,
+    "end": 66.7,
+    "text": "a fixed cost per"
+  },
+  {
+    "start": 66.7,
+    "end": 68.02,
+    "text": "run and a variable"
+  },
+  {
+    "start": 68.02,
+    "end": 69.14,
+    "text": "cost per line chain."
+  },
+  {
+    "start": 69.523,
+    "end": 70.783,
+    "text": "stop guessing your supply"
+  },
+  {
+    "start": 70.783,
+    "end": 72.363,
+    "text": "chain blast radius let"
+  },
+  {
+    "start": 72.363,
+    "end": 76.243,
+    "text": "the agent map the"
+  },
+  {
+    "start": 76.243,
+    "end": 79.063,
+    "text": "damage before you prove"
+  },
+  {
+    "start": 79.063,
+    "end": 79.423,
+    "text": "the delay."
+  }
+];
+
+    CUES.forEach(cue => {
+      tl.call(() => {
+        captionEl.innerText = cue.text;
+        gsap.to(captionEl, { autoAlpha: 1, duration: 0.1 });
+      }, null, cue.start);
+
+      tl.call(() => {
+        gsap.to(captionEl, { autoAlpha: 0, duration: 0.1 });
+      }, null, cue.end);
+    });
+
+    // =========================================================================
+    // BEAT 1: Kinetic Headline & PO Delay (t = 0.00s -> 8.65s)
+    // =========================================================================
+    tl.fromTo("#stage-beat-1",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      0.00
+    );
+    tl.fromTo("#b1-email-card",
+      { autoAlpha: 0, scale: 0.92, y: 20 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.7, ease: "back.out(1.2)", immediateRender: false },
+      0.80
+    );
+    tl.to("#stage-beat-1",
+      { autoAlpha: 0, scale: 0.95, y: -20, duration: 0.45, ease: "power2.in" },
+      8.45
+    );
+
+    // =========================================================================
+    // BEAT 2: Lane Stack Marking & Pegging (t = 9.00s -> 23.90s)
+    // =========================================================================
+    tl.fromTo("#stage-beat-2",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      9.00
+    );
+    tl.fromTo(".lane-item",
+      { autoAlpha: 0, x: -30 },
+      { autoAlpha: 1, x: 0, duration: 0.5, stagger: 0.35, ease: "power2.out", immediateRender: false },
+      9.40
+    );
+    tl.to("#lane-4",
+      { borderColor: "#38BDF8", boxShadow: "0 0 35px rgba(56, 189, 248, 0.4)", duration: 0.6 },
+      18.50
+    );
+    tl.to("#stage-beat-2",
+      { autoAlpha: 0, scale: 0.95, y: -20, duration: 0.45, ease: "power2.in" },
+      23.70
+    );
+
+    // =========================================================================
+    // BEAT 3: Inventory Trajectory Graph & Breach (t = 24.25s -> 34.86s)
+    // =========================================================================
+    tl.fromTo("#stage-beat-3",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      24.25
+    );
+    tl.fromTo("#delayed-curve",
+      { strokeDasharray: 1000, strokeDashoffset: 1000 },
+      { strokeDashoffset: 0, duration: 2.2, ease: "power2.inOut", immediateRender: false },
+      24.75
+    );
+    tl.fromTo("#b3-breach-callout",
+      { autoAlpha: 0, scale: 0.9 },
+      { autoAlpha: 1, scale: 1, duration: 0.6, ease: "back.out(1.4)", immediateRender: false },
+      29.25
+    );
+    tl.to("#stage-beat-3",
+      { autoAlpha: 0, scale: 0.95, y: -20, duration: 0.45, ease: "power2.in" },
+      34.66
+    );
+
+    // =========================================================================
+    // BEAT 4: D365 Action Pane & Simulation Form (t = 35.21s -> 47.66s)
+    // =========================================================================
+    tl.fromTo("#stage-beat-4",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      35.21
+    );
+    tl.fromTo("#b4-cursor",
+      { autoAlpha: 0, scale: 1.5, x: 80, y: 60 },
+      { autoAlpha: 1, scale: 1, x: 0, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      37.71
+    );
+    tl.to("#sim-btn",
+      { scale: 0.96, backgroundColor: "#0369A1", duration: 0.15, yoyo: true, repeat: 1 },
+      38.71
+    );
+    tl.to("#stage-beat-4",
+      { autoAlpha: 0, scale: 0.95, y: -20, duration: 0.45, ease: "power2.in" },
+      47.46
+    );
+
+    // =========================================================================
+    // BEAT 5: VISUAL PAYOFF - Has Impact Verdict & Order Tree (t = 48.01s -> 60.39s)
+    // Visuals lead voice by ~1.0s:
+    // Voice lands on 'has impact' at 50.3s -> Verdict card reveals at 49.3s
+    // Voice lands on 'production job' at 53.6s -> Production node reveals at 52.6s
+    // Voice lands on 'sales order' at 55.3s -> Sales order node reveals at 54.3s
+    // =========================================================================
+    tl.fromTo("#stage-beat-5",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      48.01
+    );
+    tl.fromTo("#b5-verdict",
+      { autoAlpha: 0, scale: 0.88 },
+      { autoAlpha: 1, scale: 1, duration: 0.7, ease: "back.out(1.4)", immediateRender: false },
+      49.30
+    );
+    tl.fromTo("#tree-node-prd",
+      { autoAlpha: 0, y: 15 },
+      { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", immediateRender: false },
+      52.60
+    );
+    tl.fromTo("#tree-node-so",
+      { autoAlpha: 0, y: 15 },
+      { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", immediateRender: false },
+      54.30
+    );
+    tl.to("#stage-beat-5",
+      { autoAlpha: 0, scale: 0.95, y: -20, duration: 0.45, ease: "power2.in" },
+      60.19
+    );
+
+    // =========================================================================
+    // BEAT 6: Copilot Studio Capacity Architecture (t = 60.74s -> 69.17s)
+    // =========================================================================
+    tl.fromTo("#stage-beat-6",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      60.74
+    );
+    tl.fromTo("#cost-card-1",
+      { autoAlpha: 0, x: -30 },
+      { autoAlpha: 1, x: 0, duration: 0.6, ease: "power2.out", immediateRender: false },
+      61.54
+    );
+    tl.fromTo("#cost-card-2",
+      { autoAlpha: 0, x: 30 },
+      { autoAlpha: 1, x: 0, duration: 0.6, ease: "power2.out", immediateRender: false },
+      63.24
+    );
+    tl.to("#stage-beat-6",
+      { autoAlpha: 0, scale: 0.95, y: -20, duration: 0.45, ease: "power2.in" },
+      68.97
+    );
+
+    // =========================================================================
+    // BEAT 7: Large Stacked Recap Pills & Final Logo Card (t = 69.52s -> 79.53s)
+    // =========================================================================
+    tl.fromTo("#stage-beat-7",
+      { autoAlpha: 0, scale: 0.95, y: 30 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", immediateRender: false },
+      69.52
+    );
+    tl.fromTo(".recap-chip",
+      { autoAlpha: 0, scale: 0.9, y: 20 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.5, stagger: 0.25, ease: "back.out(1.2)", immediateRender: false },
+      69.92
+    );
+    // Clean transition: fade recap before solo logo card enters
+    tl.to("#stage-beat-7",
+      { autoAlpha: 0, duration: 0.4, ease: "power2.in" },
+      77.03
+    );
+    // Solo Neural365 Logo Card enters alone on final line
+    tl.fromTo("#final-logo-stage",
+      { autoAlpha: 0, scale: 0.85 },
+      { autoAlpha: 1, scale: 1, duration: 0.8, ease: "power3.out", immediateRender: false },
+      77.53
+    );
+
+  </script>
+</body>
+</html>

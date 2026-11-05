@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Sora, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 import Nav from '@/components/nav'
@@ -24,13 +24,26 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: 'swap',
 })
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://community.neural365ltd.com'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#060A12',
+}
+
 export const metadata: Metadata = {
-  title: 'neural365 COMMUNITY — Master Microsoft AI Agents & ERP, hands-on',
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: siteUrl,
+  },
+  title: 'neural365 COMMUNITY — Explore Microsoft AI Agents & ERP Together',
   description:
-    'Your ultimate independent community hub for upcoming Dynamics 365, Dataverse, and Power Platform AI features. Interactive guides, video shorts, and micro-podcasts.',
+    'Your agentic community hub for upcoming Dynamics 365, Dataverse, and Power Platform AI features. Interactive guides, video shorts, and micro-podcasts.',
   keywords: [
     'Dynamics 365', 'Power Platform', 'Copilot', 'AI Agents', 'D365 F&O',
-    'Dataverse', 'Microsoft', 'ERP', 'community hub',
+    'Dataverse', 'Microsoft', 'ERP', 'community hub', 'neural365',
   ],
   openGraph: {
     title: 'neural365 COMMUNITY — Master Microsoft AI Agents & ERP, hands-on',
@@ -38,18 +51,64 @@ export const metadata: Metadata = {
       'Interactive guides, Neural Shorts, and Micro-podcasts for the D365 & Power Platform ecosystem.',
     type: 'website',
     siteName: 'neural365 COMMUNITY',
+    url: siteUrl,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'neural365 COMMUNITY — Master Microsoft AI Agents & ERP, hands-on',
+    description:
+      'Independent research hub for Dynamics 365, Dataverse, and Copilot AI Agents.',
   },
 }
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://neural365ltd.com/#organization',
+        name: 'neural365 Ltd',
+        url: 'https://neural365ltd.com',
+        logo: `${siteUrl}/neural365-logo-mark.png`,
+        sameAs: [
+          'https://linkedin.com/company/neural365',
+          'https://github.com/abhi-neural365',
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${siteUrl}/#website`,
+        url: siteUrl,
+        name: 'neural365 COMMUNITY',
+        publisher: {
+          '@id': 'https://neural365ltd.com/#organization',
+        },
+        description: 'Independent research community hub for Microsoft Dynamics 365, Dataverse, and Copilot AI Agents.',
+      },
+    ],
+  }
+
   return (
     <html
       lang="en"
       className={`${inter.variable} ${sora.variable} ${ibmPlexMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="neural365 COMMUNITY RSS Feed"
+          href="/feed.xml"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body suppressHydrationWarning>
         <Nav />
         <main>{children}</main>

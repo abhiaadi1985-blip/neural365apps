@@ -8,8 +8,8 @@ import Link from 'next/link'
  * When guides go live, restore the full implementation from git history.
  */
 export const metadata: Metadata = {
-  title: 'Guides — Coming Soon | neural365 Community',
-  description: 'Hands-on guides for Dynamics 365 and Power Platform are coming soon to the neural365 Community hub.',
+  title: 'Guides — Coming Soon | neural365 COMMUNITY',
+  description: 'Hands-on guides for Dynamics 365 and Power Platform are coming soon to the neural365 COMMUNITY hub.',
 }
 
 export default async function GuidePage() {

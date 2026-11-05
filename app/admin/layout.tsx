@@ -9,19 +9,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [draftCount, setDraftCount] = useState<number>(0)
   const [mediaCount, setMediaCount] = useState<number>(0)
+  const [blogDraftCount, setBlogDraftCount] = useState<number>(0)
+  const [blogMediaCount, setBlogMediaCount] = useState<number>(0)
 
   const fetchCounts = useCallback(async () => {
     try {
       const supabase = createClient()
-      const [draftRes, mediaRes] = await Promise.all([
+      const [draftRes, mediaRes, blogDraftRes, blogMediaRes] = await Promise.all([
         supabase.from('pulse_items').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
         supabase.from('pulse_items').select('id', { count: 'exact', head: true }).eq('status', 'media_pending'),
+        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'media_pending'),
       ])
       if (typeof draftRes.count === 'number') {
         setDraftCount(draftRes.count)
       }
       if (typeof mediaRes.count === 'number') {
         setMediaCount(mediaRes.count)
+      }
+      if (typeof blogDraftRes.count === 'number') {
+        setBlogDraftCount(blogDraftRes.count)
+      }
+      if (typeof blogMediaRes.count === 'number') {
+        setBlogMediaCount(blogMediaRes.count)
       }
     } catch {
       // Ignore count fetch errors
@@ -59,9 +69,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)', letterSpacing: '0.08em', marginBottom: 16 }}>
-          EDITORIAL PIPELINE
+          PULSE PIPELINE
         </div>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
           <Link href="/admin/review" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 8, color: 'var(--text)', textDecoration: 'none', background: pathname.startsWith('/admin/review') ? 'var(--panel)' : 'transparent', border: pathname.startsWith('/admin/review') ? '1px solid var(--line)' : '1px solid transparent' }}>
             <span>Text Review</span>
             <span style={{
@@ -83,6 +93,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               fontSize: '0.75rem',
               fontFamily: '"IBM Plex Mono", monospace'
             }}>{mediaCount}</span>
+          </Link>
+        </nav>
+
+        <div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)', letterSpacing: '0.08em', marginBottom: 16 }}>
+          BLOG PIPELINE
+        </div>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Link href="/admin/blog-review" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 8, color: 'var(--text)', textDecoration: 'none', background: pathname.startsWith('/admin/blog-review') ? 'var(--panel)' : 'transparent', border: pathname.startsWith('/admin/blog-review') ? '1px solid var(--line)' : '1px solid transparent' }}>
+            <span>Blog Review</span>
+            <span style={{
+              background: blogDraftCount > 0 ? 'var(--azure-dim)' : 'var(--line)',
+              color: blogDraftCount > 0 ? 'var(--azure)' : 'var(--text-muted)',
+              padding: '2px 6px',
+              borderRadius: 4,
+              fontSize: '0.75rem',
+              fontFamily: '"IBM Plex Mono", monospace'
+            }}>{blogDraftCount}</span>
+          </Link>
+          <Link href="/admin/blog-media" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 8, color: 'var(--text-muted)', textDecoration: 'none', background: pathname.startsWith('/admin/blog-media') ? 'var(--panel)' : 'transparent', border: pathname.startsWith('/admin/blog-media') ? '1px solid var(--line)' : '1px solid transparent' }}>
+            <span>Blog Media</span>
+            <span style={{
+              background: blogMediaCount > 0 ? 'var(--azure-dim)' : 'var(--line)',
+              color: blogMediaCount > 0 ? 'var(--azure)' : 'var(--text-muted)',
+              padding: '2px 6px',
+              borderRadius: 4,
+              fontSize: '0.75rem',
+              fontFamily: '"IBM Plex Mono", monospace'
+            }}>{blogMediaCount}</span>
           </Link>
         </nav>
 

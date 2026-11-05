@@ -1,6 +1,6 @@
 /**
  * Hermes cron entrypoint — run.ts
- * Schedule: every 3 days — cron: 0 6 * /3 * *  (remove space before /3)
+ * Schedule: weekly — cron: 0 6 * * 1 (Mondays at 06:00 UTC)
  *
  * Run manually: npx ts-node worker/hermes/run.ts
  * Run as cron:  Add to pm2 ecosystem or systemd timer (see docs/deploy.md)
@@ -14,9 +14,9 @@ import type { RawItem, Pillar }  from './pipeline'
 import { communityBlogs }        from './sources/community-blogs.config'
 
 // ── Run watermark ─────────────────────────────────────────────────────────
-// For simplicity, default to fetching items from the last 4 days.
+// Default to fetching items from the last 8 days (weekly sync + 1 day buffer).
 // Extend to persist a per-source watermark in a JSON file or Supabase table.
-const LOOKBACK_DAYS = 4
+const LOOKBACK_DAYS = 8
 const sinceDate = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
 
 interface SourceResult {

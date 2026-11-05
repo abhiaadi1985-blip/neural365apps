@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "historyId": "4eefba24-8225-4025-90bb-32ae20a0c6ff",
+  "currentRevision": null,
+  "pendingChanges": false,
+  "files": {
+    "assets/neural365-logo-mark@3x.png": {
+      "hash": "3193feae90236162ffa02b2d4cabfc7f152c75b531fc3de76f568c0bde02f732",
+      "content": "C:\\Users\\USER\\.cache\\hyperframes\\history\\4eefba24-8225-4025-90bb-32ae20a0c6ff\\blobs\\31\\3193feae90236162ffa02b2d4cabfc7f152c75b531fc3de76f568c0bde02f732"
+    },
+    "edl.json": {
+      "hash": "1417521b1f7fc73d9596e170964a57848f2c5b6cc43ec63f79e99164406394af",
+      "content": "C:\\Users\\USER\\.cache\\hyperframes\\history\\4eefba24-8225-4025-90bb-32ae20a0c6ff\\blobs\\14\\1417521b1f7fc73d9596e170964a57848f2c5b6cc43ec63f79e99164406394af"
+    },
+    "index.html": {
+      "hash": "595690fc35efd55bdc3624b2699d92d9fffd9715b9250cef97ac506422015545",
+      "content": "C:\\Users\\USER\\.cache\\hyperframes\\history\\4eefba24-8225-4025-90bb-32ae20a0c6ff\\blobs\\59\\595690fc35efd55bdc3624b2699d92d9fffd9715b9250cef97ac506422015545"
+    },
+    "words.json": {
+      "hash": "1d561464671432089d51733694ca7bd4f2643cfda9e1c3d0fb56f692047d9dce",
+      "content": "C:\\Users\\USER\\.cache\\hyperframes\\history\\4eefba24-8225-4025-90bb-32ae20a0c6ff\\blobs\\1d\\1d561464671432089d51733694ca7bd4f2643cfda9e1c3d0fb56f692047d9dce"
+    }
+  },
+  "revisions": {},
+  "checks": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "3ee82da1-3d5b-46dc-bdc9-d93495c574cf",
+      "completedAt": 1793837409837,
+      "output": "C:\\Users\\USER\\.gemini\\antigravity\\scratch\\neural365\\output\\ns03_visuals.mp4",
+      "status": "completed",
+      "revision": null
+    },
+    "retainedRevisions": []
+  },
+  "pendingArtifactCleanup": []
+}

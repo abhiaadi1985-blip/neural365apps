@@ -23,6 +23,14 @@
   const items = (data && data.length > 0) ? data : SEED_PULSE
   ```
 
+## SEED_BLOG Fallback Pattern
+- The shared source of truth for all blog articles is `lib/seed-blog.ts` (type `BlogPost` is defined here).
+- Wherever a page queries Supabase for `blog_posts`, ALWAYS add a fallback to `SEED_BLOG` when the result is empty:
+  ```ts
+  const { data } = await supabase.from('blog_posts').select('*').eq('status', 'live')
+  const posts = (data && data.length > 0) ? data : SEED_BLOG
+  ```
+
 ## generateStaticParams — Do Not Use cookies()
 - Next.js does NOT allow `cookies()` inside `generateStaticParams` — it runs at build time without an HTTP request.
 - For any dynamic page that queries Supabase with cookies, use `export const dynamic = 'force-dynamic'` instead of `generateStaticParams`.
@@ -35,9 +43,10 @@
 - Do NOT include plain English sentences or backtick characters anywhere in the file.
 
 ## Admin Editorial Pipeline Architecture
-- `/admin/review` — text review queue. Shows `pulse_items` where `status = 'draft'`.
-- `/admin/media` — media review queue. Shows items where `status = 'media_pending'`.
-- After text approval → `status` moves to `'media_pending'` (triggers NotebookLM worker).
-- After media approval → `status` moves to `'live'` (visible on public Pulse feed).
-- The review page is split: `app/admin/review/page.tsx` (Server Component, fetches DB) and `app/admin/review/client-page.tsx` (Client Component, handles editing state + server actions).
-- Server actions are in `app/admin/review/actions.ts`.
+- `/admin/review` — text review queue for Pulse. Shows `pulse_items` where `status = 'draft'`.
+- `/admin/media` — media review queue for Pulse. Shows items where `status = 'media_pending'`.
+- `/admin/blog-review` — text review queue for Blog. Shows `blog_posts` where `status = 'draft'`.
+- `/admin/blog-media` — media review queue for Blog. Shows items where `status = 'media_pending'`.
+- After text approval → `status` moves to `'media_pending'` (triggers Open Notebook / video worker).
+- After media approval → `status` moves to `'live'` (visible on public Pulse feed / Blog feed).
+- The review pages are split into Server Component (fetches DB) and Client Component (handles editing state + server actions).

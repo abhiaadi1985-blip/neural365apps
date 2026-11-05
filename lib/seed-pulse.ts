@@ -14,9 +14,14 @@ export interface PulseItem {
   content_md?: string
   demo_scenario_md?: string
 
-  // Media URLs
+  // Media URLs & Worker brief
   podcast_audio_url?: string
   short_video_url?: string
+  video_brief?: Record<string, unknown> | null
+  render_attempts?: number
+  render_last_error?: string | null
+  render_last_attempt_at?: string | null
+  created_at?: string
 }
 
 /**

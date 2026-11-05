@@ -1,4 +1,4 @@
-# neural365apps — Spoke Environment Setup
+# neural365 COMMUNITY — Spoke Environment Setup
 
 ## Overview
 
@@ -64,7 +64,7 @@ For non-production demos, use the **Microsoft 365 Developer Program**:
    - Power Platform Admin Center → Environments → [your env] → Settings
    - Enable: `Generative AI features`, `AI Builder credits`
 
-4. **Isolation:** Never connect the spoke environments to the production Supabase database or the neural365apps web server. They exist only as demo environments for content recording.
+4. **Isolation:** Never connect the spoke environments to the production Supabase database or the neural365 COMMUNITY web server. They exist only as demo environments for content recording.
 
 ---
 
@@ -86,8 +86,8 @@ For non-production demos, use the **Microsoft 365 Developer Program**:
 4. Add the CDN URL to the guide in Supabase:
    ```sql
    update guides
-   set short_video_url   = 'https://cdn.neural365.apps/shorts/your-short.mp4',
-       podcast_audio_url = 'https://cdn.neural365.apps/podcasts/your-podcast.mp3'
+   set short_video_url   = 'https://cdn.neural365ltd.com/shorts/your-short.mp4',
+       podcast_audio_url = 'https://cdn.neural365ltd.com/podcasts/your-podcast.mp3'
    where slug = 'your-guide-slug';
    ```
 5. Verify the guide page renders the embedded player correctly
@@ -99,4 +99,4 @@ For non-production demos, use the **Microsoft 365 Developer Program**:
 - [ ] Confirm who owns recording Neural Shorts (screen capture tooling, editing workflow)
 - [ ] Confirm NotebookLM access and podcast generation pipeline
 - [ ] Decide on CDN/storage provider for media files
-- [ ] Establish guide recording cadence (per release wave? ad hoc?)
+- [x] Established guide recording cadence: weekly updates aligned with Hermes release-wave sync

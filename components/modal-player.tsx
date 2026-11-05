@@ -5,16 +5,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 interface ModalPlayerProps {
-  src:    string | null
-  kind:   'video' | 'audio'
+  src?:   string | null
+  kind?:  'video' | 'audio'
   label:  string
+  isOpen?: boolean
   onClose: () => void
 }
 
-export default function ModalPlayer({ src, kind, label, onClose }: ModalPlayerProps) {
+export default function ModalPlayer({ src, kind = 'video', label, isOpen: propIsOpen, onClose }: ModalPlayerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const closeRef   = useRef<HTMLButtonElement>(null)
-  const isOpen = !!src
+  const isOpen = propIsOpen !== undefined ? propIsOpen : !!src
 
   // Trap focus + Escape to close
   useEffect(() => {
@@ -113,9 +114,25 @@ export default function ModalPlayer({ src, kind, label, onClose }: ModalPlayerPr
             </Link>
           )}
         </div>
-        <div className="modal-footer">
-          <span className="label">{label}</span>
-          <button ref={closeRef} className="close-btn" onClick={onClose}>
+        <div className="modal-footer" style={{ gap: 12 }}>
+          <span
+            className="label"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            {label}
+          </span>
+          <button
+            ref={closeRef}
+            className="close-btn"
+            onClick={onClose}
+            style={{ flexShrink: 0, minHeight: 36, padding: '6px 14px' }}
+          >
             Close
           </button>
         </div>

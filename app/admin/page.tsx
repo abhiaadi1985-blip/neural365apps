@@ -68,6 +68,17 @@ export default async function AdminDashboardPage() {
   const pulseMediaPending = allPulse.filter(p => p.status === 'media_pending').length
   const pulseTotal = allPulse.length
 
+  // ── Fetch blog stats ──
+  const { data: blogPosts } = await supabase
+    .from('blog_posts')
+    .select('status')
+
+  const allBlogs = blogPosts ?? []
+  const blogLive = allBlogs.filter(b => b.status === 'live').length
+  const blogDraft = allBlogs.filter(b => b.status === 'draft').length
+  const blogMediaPending = allBlogs.filter(b => b.status === 'media_pending').length
+  const blogTotal = allBlogs.length
+
   const topicData = PILLARS.map(p => ({
     slug: p.slug,
     label: p.label,
@@ -99,8 +110,12 @@ export default async function AdminDashboardPage() {
         <StatCard label="Subscribers This Week" value={subsThisWeek} color="#06b6d4" />
         <StatCard label="Pulse Live" value={pulseLive} color="#22c55e" />
         <StatCard label="Pulse Draft" value={pulseDraft} color="#f59e0b" />
-        <StatCard label="Media Pending" value={pulseMediaPending} color="#a855f7" />
+        <StatCard label="Pulse Media Pending" value={pulseMediaPending} color="#a855f7" />
+        <StatCard label="Blog Live" value={blogLive} color="#34d8b0" />
+        <StatCard label="Blog Draft" value={blogDraft} color="#f59e0b" />
+        <StatCard label="Blog Media Pending" value={blogMediaPending} color="#9b8cff" />
         <StatCard label="Total Pulse Items" value={pulseTotal} color="#64748b" />
+        <StatCard label="Total Blog Posts" value={blogTotal} color="#64748b" />
       </div>
 
       {/* ── Charts (Client Component) ── */}

@@ -216,7 +216,7 @@ Row-level security: `pulse_items` and published `guides` (`is_premium = false`) 
 
 **Purpose:** keep `pulse_items` current without manual entry.
 
-**Schedule:** cron, every 3 days (`0 6 */3 * *` as a starting point — confirm timezone with deployment target).
+**Schedule:** cron, weekly on Mondays at 06:00 UTC (`0 6 * * 1` as standard baseline — confirm timezone with deployment target).
 
 **Sources (one module per source under `/worker/hermes/sources/`):**
 1. Microsoft Learn & official technical documentation

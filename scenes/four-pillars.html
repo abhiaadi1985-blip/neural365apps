@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>4 Core Strategic Pillars - neural365 COMMUNITY</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap');
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #090D16;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #F9FAFB;
+      position: relative;
+    }
+
+    .ambient-glow {
+      position: absolute;
+      top: 10%;
+      right: 25%;
+      width: 750px;
+      height: 750px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.14) 0%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .pillars-container {
+      position: absolute;
+      inset: 0;
+      padding: 60px 100px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-box {
+      margin-bottom: 40px;
+    }
+
+    .cat-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #38BDF8;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .pillar-title {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .pillar-title span {
+      background: linear-gradient(135deg, #38BDF8, #818CF8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .grid-4 {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .p-card {
+      border-radius: 16px;
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      opacity: 0;
+    }
+
+    .p-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .card-1::before { background: #38BDF8; }
+    .card-2::before { background: #818CF8; }
+    .card-3::before { background: #34D399; }
+    .card-4::before { background: #F59E0B; }
+
+    .p-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748B;
+      margin-bottom: 12px;
+    }
+
+    .p-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .p-desc {
+      font-size: 14px;
+      color: #94A3B8;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .feature-list {
+      margin-top: auto;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-item {
+      font-size: 13px;
+      color: #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-item span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #38BDF8;
+    }
+
+    .demo-lab-tag {
+      margin-top: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #818CF8;
+      background: rgba(129, 140, 248, 0.1);
+      border: 1px solid rgba(129, 140, 248, 0.25);
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-align: center;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body data-composition-id="four-pillars" data-width="1920" data-height="1080" data-duration="12.0">
+  <div class="ambient-glow"></div>
+  <div class="grid-lines"></div>
+
+  <div class="pillars-container clip" data-start="0" data-duration="12.0">
+    <div class="header-box">
+      <div class="cat-badge">ARCHITECTURAL DOMAINS</div>
+      <h1 class="pillar-title">4 Core Pillars & <span>Spoke Demo Labs</span></h1>
+    </div>
+
+    <div class="grid-4">
+      <!-- Pillar 1 -->
+      <div class="p-card card-1" id="p1">
+        <span class="p-num">PILLAR 01</span>
+        <h3 class="p-name">Dynamics 365 ERP & F&O</h3>
+        <p class="p-desc">Autonomous accounting, financial variance analysis, and supply chain telemetry.</p>
+        <div class="feature-list">
+          <div class="feature-item"><span>✦</span> Touchless Reconciliation</div>
+          <div class="feature-item"><span>✦</span> Variance Narrative Agents</div>
+          <div class="feature-item"><span>✦</span> Anomaly Supply Alerts</div>
+        </div>
+        <div class="demo-lab-tag">SPOKE LAB 01</div>
+      </div>
+
+      <!-- Pillar 2 -->
+      <div class="p-card card-2" id="p2">
+        <span class="p-num">PILLAR 02</span>
+        <h3 class="p-name">Dataverse Platform</h3>
+        <p class="p-desc">Grounding generative AI directly into enterprise records with strict ALM governance.</p>
+        <div class="feature-list">
+          <div class="feature-item"><span>✦</span> Virtual Table Connectors</div>
+          <div class="feature-item"><span>✦</span> Dynamic Grounding RAG</div>
+          <div class="feature-item"><span>✦</span> ALM & Solution Pipelines</div>
+        </div>
+        <div class="demo-lab-tag">SPOKE LAB 02</div>
+      </div>
+
+      <!-- Pillar 3 -->
+      <div class="p-card card-3" id="p3">
+        <span class="p-num">PILLAR 03</span>
+        <h3 class="p-name">Copilot Multi-Agents</h3>
+        <p class="p-desc">Orchestrating autonomous agents with cross-application handoffs & audit gating.</p>
+        <div class="feature-list">
+          <div class="feature-item"><span>✦</span> Copilot Studio Framework</div>
+          <div class="feature-item"><span>✦</span> Multi-Agent Delegation</div>
+          <div class="feature-item"><span>✦</span> Enterprise Audit Gates</div>
+        </div>
+        <div class="demo-lab-tag">SPOKE LAB 03</div>
+      </div>
+
+      <!-- Pillar 4 -->
+      <div class="p-card card-4" id="p4">
+        <span class="p-num">PILLAR 04</span>
+        <h3 class="p-name">Industry Solutions</h3>
+        <p class="p-desc">Tailored vertical playbooks for manufacturing, retail, and financial institutions.</p>
+        <div class="feature-list">
+          <div class="feature-item"><span>✦</span> Manufacturing Operations</div>
+          <div class="feature-item"><span>✦</span> Omnichannel Retail AI</div>
+          <div class="feature-item"><span>✦</span> Financial Risk Sandboxes</div>
+        </div>
+        <div class="demo-lab-tag">SPOKE LAB 04</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+    window.__timelines["four-pillars"] = tl;
+
+    // Stagger cards in
+    tl.fromTo("#p1", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, 0.4);
+    tl.fromTo("#p2", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, 1.0);
+    tl.fromTo("#p3", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, 1.6);
+    tl.fromTo("#p4", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, 2.2);
+
+    // Dynamic focus on each card successively
+    tl.to("#p1", { scale: 1.04, borderColor: "rgba(56,189,248,0.6)", duration: 0.6, ease: "back.out(1.4)" }, 3.0);
+    tl.to("#p1", { scale: 1.0, borderColor: "rgba(255,255,255,0.08)", duration: 0.5 }, 4.5);
+
+    tl.to("#p2", { scale: 1.04, borderColor: "rgba(129,140,248,0.6)", duration: 0.6, ease: "back.out(1.4)" }, 4.6);
+    tl.to("#p2", { scale: 1.0, borderColor: "rgba(255,255,255,0.08)", duration: 0.5 }, 6.0);
+
+    tl.to("#p3", { scale: 1.04, borderColor: "rgba(52,211,153,0.6)", duration: 0.6, ease: "back.out(1.4)" }, 6.1);
+    tl.to("#p3", { scale: 1.0, borderColor: "rgba(255,255,255,0.08)", duration: 0.5 }, 7.5);
+
+    tl.to("#p4", { scale: 1.04, borderColor: "rgba(245,158,11,0.6)", duration: 0.6, ease: "back.out(1.4)" }, 7.6);
+    tl.to("#p4", { scale: 1.0, borderColor: "rgba(255,255,255,0.08)", duration: 0.5 }, 9.0);
+  </script>
+</body>
+</html>

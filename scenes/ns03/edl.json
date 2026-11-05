@@ -1,0 +1,136 @@
+{
+  "title": "Neural365 Shorts #NS03 — D365 Procurement Agent Impact Analysis",
+  "resolution": [1080, 1920],
+  "fps": 30,
+  "status_chip": {
+    "text": "PUBLIC PREVIEW",
+    "color": "#F59E0B",
+    "rule": "Persistent amber throughout entire video. GA not announced."
+  },
+  "source_references": [
+    {
+      "ref": "MS-SCM-REL-2026W1",
+      "url": "https://learn.microsoft.com/en-us/dynamics365/release-plan/2026wave1/enterprise-resource-planning/dynamics365-supply-chain-management/manage-downstream-impact-po-changes-procurement-agent-impact-analysis",
+      "verified_date": "2026-11-05"
+    },
+    {
+      "ref": "MS-SCM-OVERVIEW",
+      "url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/procurement/procurement-agent-impact-analysis-overview",
+      "verified_date": "2026-11-05"
+    },
+    {
+      "ref": "MS-SCM-REVIEW",
+      "url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/procurement/procurement-agent-impact-analysis-review-changes",
+      "verified_date": "2026-11-05"
+    },
+    {
+      "ref": "MS-SCM-SIMULATION",
+      "url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/procurement/procurement-agent-impact-analysis-simulation",
+      "verified_date": "2026-11-05"
+    }
+  ],
+  "beats": [
+    {
+      "id": "beat_1",
+      "archetype": "kinetic_headline",
+      "voice_text": "When a supplier emails a five-day delay on purchase order zero zero eight four two, the purchaser usually spends hours chasing spreadsheets.",
+      "ui_strings": {
+        "page_title": "(Preview) Emails from vendors",
+        "po_id": "PO-00842",
+        "vendor": "Fabrikam Supply",
+        "delay": "+5 Days"
+      },
+      "source_ref": "MS-SCM-REVIEW",
+      "est_t0": 0.0,
+      "est_dur": 10.5
+    },
+    {
+      "id": "beat_2",
+      "archetype": "lane_stack",
+      "voice_text": "Instead, the Procurement Agent immediately traces marking and pegging chains across Dynamics three sixty-five Supply Chain Management to calculate the downstream blast radius.",
+      "ui_strings": {
+        "tiers": [
+          "Purchase Order PO-00842",
+          "Marking & Pegging Engine",
+          "Production Order PRD-0410",
+          "Customer Sales Order SO-00902"
+        ]
+      },
+      "source_ref": "MS-SCM-REL-2026W1",
+      "est_t0": 10.5,
+      "est_dur": 11.5
+    },
+    {
+      "id": "beat_3",
+      "archetype": "doc_reader",
+      "voice_text": "It checks confirmed incoming supply against projected on-hand inventory, catching the exact day safety stock breaches minimum threshold and flips into a stockout.",
+      "ui_strings": {
+        "location": "Site 1 / Warehouse 11",
+        "threshold": "Minimum Safety Threshold: 200",
+        "projected_negative": "-45 EA"
+      },
+      "source_ref": "MS-SCM-OVERVIEW",
+      "est_t0": 22.0,
+      "est_dur": 12.0
+    },
+    {
+      "id": "beat_4",
+      "archetype": "ui_form_demo",
+      "voice_text": "Before accepting the supplier's new date, the purchaser runs an impact simulation to test expediting options without altering the live purchase order or planning calculations.",
+      "ui_strings": {
+        "action_pane": "Simulate purchase order changes",
+        "button": "Simulate impact",
+        "safety_note": "Impact simulations don't change the actual purchase order or affect planning calculations."
+      },
+      "source_ref": "MS-SCM-SIMULATION",
+      "est_t0": 34.0,
+      "est_dur": 12.0
+    },
+    {
+      "id": "beat_5",
+      "archetype": "ui_grid",
+      "voice_text": "The agent returns a clear verdict: has impact, exposing every affected production job and customer sales order before anyone on the shop floor is caught off guard.",
+      "ui_strings": {
+        "verdict": "Has impact",
+        "view_details": "View details",
+        "tree_nodes": [
+          "Production Order PRD-0410 (Delayed)",
+          "Sales Order SO-00902 (At Risk)"
+        ]
+      },
+      "source_ref": "MS-SCM-REL-2026W1",
+      "est_t0": 46.0,
+      "est_dur": 12.5,
+      "payoff_lead_seconds": 1.0
+    },
+    {
+      "id": "beat_6",
+      "archetype": "stat_cards",
+      "voice_text": "Powered by Copilot Studio capacity, billing is structured around a fixed cost per run and a variable cost per line change.",
+      "ui_strings": {
+        "card_1": "Fixed Cost Per Run",
+        "card_2": "Variable Cost (Per Line Change)"
+      },
+      "source_ref": "MS-SCM-OVERVIEW",
+      "est_t0": 58.5,
+      "est_dur": 9.5
+    },
+    {
+      "id": "beat_7",
+      "archetype": "end_card",
+      "voice_text": "Stop guessing your supply chain blast radius. Let the agent map the damage before you approve the delay.",
+      "ui_strings": {
+        "recap_pills": [
+          "Automated Pegging Traversal",
+          "Non-Destructive Simulation",
+          "Instant 'Has impact' Verdict"
+        ],
+        "brand_name": "NEURAL365",
+        "brand_url": "neural365.com"
+      },
+      "source_ref": "MS-SCM-REL-2026W1",
+      "est_t0": 68.0,
+      "est_dur": 10.0
+    }
+  ]
+}

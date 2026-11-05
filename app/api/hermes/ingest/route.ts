@@ -22,6 +22,7 @@ interface IngestPayload {
     status?:            'draft' | 'media_pending' | 'live'
     podcast_audio_url?: string
     short_video_url?:   string
+    video_brief?:       Record<string, unknown>
   }[]
 }
 

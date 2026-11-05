@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PROJECT_NAME}} — Keynote Teleprompter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060A12;
+      --card-bg: rgba(14, 22, 37, 0.65);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent-blue: #2F86FF;
+      --accent-turquoise: #34D8B0;
+      --accent-amber: #F2B544;
+      --text: #F0F4F8;
+      --text-muted: #8E9BAE;
+      --cue-bg: rgba(47, 134, 255, 0.12);
+      --cue-border: rgba(47, 134, 255, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top HUD Controls */
+    header {
+      background: rgba(6, 10, 18, 0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-turquoise));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: #060A12;
+    }
+
+    .brand-title {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent-turquoise);
+      background: rgba(52, 216, 176, 0.12);
+      border: 1px solid rgba(52, 216, 176, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button.primary-btn {
+      background: var(--accent-turquoise);
+      color: #060A12;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    button.primary-btn:hover {
+      background: #4ae0bc;
+      transform: translateY(-1px);
+    }
+
+    button.secondary-btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button.secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .timer-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-turquoise);
+      background: rgba(52, 216, 176, 0.1);
+      border: 1px solid rgba(52, 216, 176, 0.25);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    input[type=range] {
+      accent-color: var(--accent-turquoise);
+      cursor: pointer;
+      width: 80px;
+    }
+
+    /* Fixed Eyeline Marker (Aligned to Camera Lens) */
+    .reading-guide {
+      position: absolute;
+      top: 35%;
+      left: 0;
+      right: 0;
+      height: 84px;
+      background: linear-gradient(90deg, rgba(47, 134, 255, 0.06) 0%, rgba(52, 216, 176, 0.1) 50%, rgba(47, 134, 255, 0.06) 100%);
+      border-top: 1px dashed rgba(52, 216, 176, 0.35);
+      border-bottom: 1px dashed rgba(52, 216, 176, 0.35);
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 28px;
+    }
+
+    .reading-guide::before {
+      content: '▲ LOOK HERE / CAMERA EYELINE ▲';
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent-turquoise);
+      letter-spacing: 0.1em;
+      opacity: 0.85;
+    }
+
+    /* Main Scrolling Container */
+    #scroller {
+      flex: 1;
+      overflow-y: scroll;
+      padding: 280px 14% 500px 14%;
+      scroll-behavior: auto;
+    }
+
+    #scroller::-webkit-scrollbar {
+      width: 6px;
+    }
+    #scroller::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+    }
+
+    .act-card {
+      margin-bottom: 72px;
+      padding: 28px 32px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .act-tag {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .action-cue {
+      display: block;
+      margin: 12px 0 20px 0;
+      background: var(--cue-bg);
+      border: 1px solid var(--cue-border);
+      border-left: 4px solid var(--accent-blue);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: #93C5FD;
+      text-align: left;
+    }
+
+    .script-text {
+      font-size: 28px;
+      line-height: 1.6;
+      font-weight: 500;
+      color: #F8FAFC;
+      letter-spacing: -0.01em;
+      text-align: left;
+    }
+
+    .script-text em {
+      color: var(--accent-turquoise);
+      font-style: normal;
+      font-weight: 700;
+    }
+
+    .script-text strong {
+      color: #F8FAFC;
+      font-weight: 700;
+    }
+
+    /* Footer Info */
+    footer {
+      background: rgba(6, 10, 18, 0.95);
+      border-top: 1px solid var(--border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .shortcuts {
+      display: flex;
+      gap: 16px;
+    }
+
+    kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 10px;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header>
+    <div class="brand">
+      <div class="logo">P</div>
+      <div class="brand-title">{{PROJECT_NAME}}</div>
+      <div class="badge">PROMPTER</div>
+    </div>
+
+    <div class="controls">
+      <div class="timer-badge" id="timerDisplay">00:00 / {{FORMATTED_DURATION}} (0%)</div>
+
+      <button class="primary-btn" id="playBtn" onclick="togglePlay()">
+        <span id="playIcon">▶</span> <span id="playText">START PROMPTER</span>
+      </button>
+
+      <button class="secondary-btn" onclick="resetPrompter()">↺ RESTART</button>
+
+      <div class="slider-group">
+        <span>SPEED:</span>
+        <input type="range" id="speedSlider" min="0.4" max="2.5" step="0.05" value="1.0" oninput="updateSpeedMultiplier(this.value)">
+        <span id="speedVal">1.0x</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Reading Eyeline Guide -->
+  <div class="reading-guide"></div>
+
+  <!-- Scrolling Viewport -->
+  <div id="scroller">
+{{SCRIPT_CONTENT}}
+  </div>
+
+  <!-- Bottom Bar -->
+  <footer>
+    <div class="shortcuts">
+      <span><kbd>SPACE</kbd> Play / Pause</span>
+      <span><kbd>▲</kbd> <kbd>▼</kbd> Speed</span>
+      <span><kbd>R</kbd> Restart</span>
+    </div>
+    <div>
+      💡 <em>Calibrated for natural ~135 WPM pace ({{TARGET_DURATION_SECONDS}}s runtime)</em>
+    </div>
+  </footer>
+
+  <script>
+    const TARGET_DURATION_SECONDS = {{TARGET_DURATION_SECONDS}}; // Target duration in seconds
+    let isPlaying = false;
+    let speedMultiplier = 1.0;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+    let scrollAnimFrame = null;
+    let lastTimestamp = null;
+    let currentScrollPos = 0; // High-precision float accumulator (prevents browser truncation bug)
+
+    const scroller = document.getElementById('scroller');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+
+    // Keep currentScrollPos synced on manual user scroll when paused
+    scroller.addEventListener('scroll', () => {
+      if (!isPlaying) {
+        currentScrollPos = scroller.scrollTop;
+      }
+    });
+
+    function updateSpeedMultiplier(val) {
+      speedMultiplier = parseFloat(val);
+      speedVal.innerText = speedMultiplier.toFixed(2) + 'x';
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pausePrompter();
+      } else {
+        startPrompter();
+      }
+    }
+
+    function startPrompter() {
+      isPlaying = true;
+      playIcon.innerText = '⏸';
+      playText.innerText = 'PAUSE';
+      playBtn.style.background = '#F2B544';
+      lastTimestamp = null;
+      currentScrollPos = scroller.scrollTop;
+
+      if (!timerInterval) {
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+          const secs = String(secondsElapsed % 60).padStart(2, '0');
+          const targetMins = String(Math.floor(TARGET_DURATION_SECONDS / 60)).padStart(2, '0');
+          const targetSecs = String(TARGET_DURATION_SECONDS % 60).padStart(2, '0');
+          const maxScroll = Math.max(1, scroller.scrollHeight - scroller.clientHeight);
+          const percent = Math.min(100, Math.round((currentScrollPos / maxScroll) * 100));
+          timerDisplay.innerText = `${mins}:${secs} / ${targetMins}:${targetSecs} (${percent}%)`;
+        }, 1000);
+      }
+
+      function step(timestamp) {
+        if (!isPlaying) return;
+        if (!lastTimestamp) {
+          lastTimestamp = timestamp;
+        }
+        const deltaSeconds = Math.min(0.1, (timestamp - lastTimestamp) / 1000);
+        lastTimestamp = timestamp;
+
+        const maxScroll = scroller.scrollHeight - scroller.clientHeight;
+        if (maxScroll > 0) {
+          // Dynamic calculation: covers exact document height across TARGET_DURATION_SECONDS
+          const basePixelsPerSec = maxScroll / TARGET_DURATION_SECONDS;
+          const pixelsPerSecond = Math.max(8, basePixelsPerSec * speedMultiplier);
+          
+          // CRITICAL: Accumulate float precision to prevent integer truncation freeze
+          currentScrollPos += pixelsPerSecond * deltaSeconds;
+          
+          if (currentScrollPos >= maxScroll) {
+            currentScrollPos = maxScroll;
+            scroller.scrollTop = maxScroll;
+            pausePrompter();
+            return;
+          }
+          scroller.scrollTop = Math.round(currentScrollPos);
+        }
+
+        scrollAnimFrame = requestAnimationFrame(step);
+      }
+      scrollAnimFrame = requestAnimationFrame(step);
+    }
+
+    function pausePrompter() {
+      isPlaying = false;
+      playIcon.innerText = '▶';
+      playText.innerText = 'RESUME';
+      playBtn.style.background = 'var(--accent-turquoise)';
+      if (scrollAnimFrame) cancelAnimationFrame(scrollAnimFrame);
+    }
+
+    function resetPrompter() {
+      pausePrompter();
+      currentScrollPos = 0;
+      scroller.scrollTop = 0;
+      secondsElapsed = 0;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      const targetMins = String(Math.floor(TARGET_DURATION_SECONDS / 60)).padStart(2, '0');
+      const targetSecs = String(TARGET_DURATION_SECONDS % 60).padStart(2, '0');
+      timerDisplay.innerText = `00:00 / ${targetMins}:${targetSecs} (0%)`;
+      playText.innerText = 'START PROMPTER';
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        const newVal = Math.min(2.5, parseFloat(speedSlider.value) + 0.1);
+        speedSlider.value = newVal;
+        updateSpeedMultiplier(newVal);
+      } else if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        const newVal = Math.max(0.4, parseFloat(speedSlider.value) - 0.1);
+        speedSlider.value = newVal;
+        updateSpeedMultiplier(newVal);
+      } else if (e.key === 'r' || e.key === 'R') {
+        resetPrompter();
+      }
+    });
+
+    // Initial setup
+    updateSpeedMultiplier(1.0);
+  </script>
+</body>
+</html>

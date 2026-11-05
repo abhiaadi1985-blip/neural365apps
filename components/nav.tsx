@@ -110,26 +110,60 @@ export default function Nav() {
           >
             Pulse
           </Link>
+          <Link href="/blog" style={{ transition: 'color 0.15s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+          >
+            Blog
+          </Link>
+          <Link href="/guides" style={{ transition: 'color 0.15s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+          >
+            Guides
+          </Link>
         </nav>
 
-        {/* CTA + mobile toggle */}
+        {/* CTA + Desktop Auth + mobile toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/pulse" className="btn btn-primary btn-sm">
+          {/* Desktop Auth State */}
+          <div className="desktop-auth">
+            {isSignedIn ? (
+              <Link
+                href="/account"
+                className="btn btn-secondary btn-sm"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}
+              >
+                <span>👤</span>
+                <span>Account</span>
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted)',
+                  textDecoration: 'none',
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+
+          <Link href="/pulse" className="btn btn-primary btn-sm nav-cta-btn">
             Explore latest AI features
           </Link>
+
           <button
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(o => !o)}
-            style={{
-              display: 'none',
-              background: 'transparent',
-              border: '1px solid var(--line)',
-              color: 'var(--text)',
-              borderRadius: 7,
-              padding: '7px 10px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
             className="mobile-menu-btn"
           >
             {mobileOpen ? '✕' : '☰'}
@@ -139,44 +173,179 @@ export default function Nav() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div style={{
-          borderTop: '1px solid var(--line)',
-          background: 'var(--bg)',
-          padding: '16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 14,
-        }}>
-          {pillars.map((p) => (
-            <Link key={p.href} href={p.href}
-              onClick={() => setMobileOpen(false)}
-              style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}
-            >
-              {p.label}
-            </Link>
-          ))}
-          <Link href="/pulse" onClick={() => setMobileOpen(false)}
-            style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Pulse
+        <div
+          className="mobile-drawer"
+          style={{
+            borderTop: '1px solid var(--line)',
+            background: 'rgba(6, 10, 18, 0.98)',
+            backdropFilter: 'blur(16px)',
+            padding: '20px 20px 28px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+            maxHeight: 'calc(100dvh - 65px)',
+            overflowY: 'auto',
+          }}
+        >
+          {/* Prominent CTA in mobile drawer */}
+          <Link
+            href="/pulse"
+            onClick={() => setMobileOpen(false)}
+            className="btn btn-primary"
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              padding: '12px 18px',
+              fontSize: '0.92rem',
+              textAlign: 'center',
+            }}
+          >
+            Explore latest AI features →
           </Link>
-          {isSignedIn ? (
-            <Link href="/account" onClick={() => setMobileOpen(false)}
-              style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Account
+
+          {/* Quick feeds */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 4 }}>
+            <Link
+              href="/pulse"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: '10px 8px',
+                textAlign: 'center',
+                fontSize: '0.85rem',
+                color: 'var(--text)',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              ⚡ Pulse
             </Link>
-          ) : (
-            <Link href="/sign-in" onClick={() => setMobileOpen(false)}
-              style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Sign In
+            <Link
+              href="/blog"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: '10px 8px',
+                textAlign: 'center',
+                fontSize: '0.85rem',
+                color: 'var(--text)',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              📖 Blog
             </Link>
-          )}
+            <Link
+              href="/guides"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: '10px 8px',
+                textAlign: 'center',
+                fontSize: '0.85rem',
+                color: 'var(--text)',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              🛠️ Guides
+            </Link>
+          </div>
+
+          {/* Pillars List */}
+          <div style={{ marginTop: 8 }}>
+            <span style={{
+              display: 'block',
+              fontSize: '0.72rem',
+              color: 'var(--text-muted)',
+              fontFamily: '"IBM Plex Mono", monospace',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: 10,
+            }}>
+              Ecosystem Pillars
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {pillars.map((p) => (
+                <Link
+                  key={p.href}
+                  href={p.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    color: 'var(--text)',
+                    fontSize: '0.92rem',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    background: 'var(--bg-2)',
+                    border: '1px solid var(--line)',
+                    textDecoration: 'none',
+                  }}
+                >
+                  {p.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Auth link */}
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+            {isSignedIn ? (
+              <Link
+                href="/account"
+                onClick={() => setMobileOpen(false)}
+                className="btn btn-secondary"
+                style={{ width: '100%', justifyContent: 'center' }}
+              >
+                👤 Manage Account
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                onClick={() => setMobileOpen(false)}
+                className="btn btn-ghost"
+                style={{ width: '100%', justifyContent: 'center' }}
+              >
+                Sign In to neural365
+              </Link>
+            )}
+          </div>
         </div>
       )}
 
       <style>{`
-        @media (max-width: 768px) {
+        .desktop-auth {
+          display: flex;
+          align-items: center;
+        }
+        .mobile-menu-btn {
+          display: none;
+          background: var(--panel);
+          border: 1px solid var(--line);
+          color: var(--text);
+          border-radius: 8px;
+          min-width: 44px;
+          min-height: 44px;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.15rem;
+          touch-action: manipulation;
+        }
+
+        @media (max-width: 860px) {
           nav.pillars { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
+          .desktop-auth { display: none !important; }
+          .mobile-menu-btn { display: inline-flex !important; }
+        }
+
+        @media (max-width: 640px) {
+          .nav-cta-btn { display: none !important; }
         }
       `}</style>
     </header>

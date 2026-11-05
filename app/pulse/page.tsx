@@ -84,9 +84,9 @@ export default async function PulsePage({
       </section>
 
       {/* ── Filters ── */}
-      <section style={{ padding: '24px 0', borderBottom: '1px solid var(--line)', background: 'var(--bg-2)' }}>
-        <div className="wrap" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+      <section style={{ padding: '16px 0', borderBottom: '1px solid var(--line)', background: 'var(--bg-2)' }}>
+        <div className="wrap filter-bar">
+          <span style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>
             FILTER:
           </span>
           {PILLARS.map(p => (
@@ -102,12 +102,14 @@ export default async function PulsePage({
                 color:       activePillar === p.value ? 'var(--azure)' : 'var(--text-muted)',
                 background:  activePillar === p.value ? 'var(--azure-dim)' : 'transparent',
                 transition: 'all 0.15s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {p.label}
             </Link>
           ))}
-          <span style={{ color: 'var(--line)' }}>|</span>
+          <span style={{ color: 'var(--line)', flexShrink: 0 }}>|</span>
           {LANES.map(l => (
             <Link key={l.value}
               href={`/pulse?pillar=${activePillar}&lane=${l.value}`}
@@ -121,6 +123,8 @@ export default async function PulsePage({
                 color:       activeLane === l.value ? 'var(--azure)' : 'var(--text-muted)',
                 background:  activeLane === l.value ? 'var(--azure-dim)' : 'transparent',
                 transition: 'all 0.15s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {l.label}

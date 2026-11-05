@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hermes Pipeline & HITL Architecture - neural365</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #090D16;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #F9FAFB;
+      position: relative;
+    }
+
+    .ambient-glow {
+      position: absolute;
+      top: 20%;
+      left: 30%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .diagram-container {
+      position: absolute;
+      inset: 0;
+      padding: 70px 100px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-header {
+      margin-bottom: 50px;
+    }
+
+    .category-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #38BDF8;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .headline {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .headline span {
+      color: #818CF8;
+    }
+
+    /* 4-Node Pipeline Flow */
+    .flow-stage {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .node-card {
+      flex: 1;
+      height: 380px;
+      border-radius: 16px;
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+    }
+
+    .node-card.active-hitl {
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      background: rgba(17, 24, 39, 0.85);
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.2);
+    }
+
+    .node-step {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94A3B8;
+      margin-bottom: 12px;
+    }
+
+    .node-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .node-desc {
+      font-size: 14px;
+      color: #9CA3AF;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .node-pill-list {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .node-pill-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #CBD5E1;
+    }
+
+    .hitl-banner {
+      position: absolute;
+      top: -14px;
+      right: 20px;
+      background: linear-gradient(135deg, #38BDF8, #818CF8);
+      color: #090D16;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      letter-spacing: 0.06em;
+    }
+
+    /* SVG Connector Lines */
+    .svg-connectors {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body data-composition-id="hermes-flow" data-width="1920" data-height="1080" data-duration="12.0">
+  <div class="ambient-glow"></div>
+  <div class="grid-lines"></div>
+
+  <div class="diagram-container clip" data-start="0" data-duration="12.0">
+    <div class="top-header">
+      <div class="category-badge">ARCHITECTURE & WORKFLOW</div>
+      <h1 class="headline">Hermes Ingestion Pipeline with <span>Human-in-the-Loop</span></h1>
+    </div>
+
+    <div class="flow-stage">
+      <!-- Node 1 -->
+      <div class="node-card" id="node1">
+        <span class="node-step">STAGE 01</span>
+        <h3 class="node-title">Ecosystem Ingestion</h3>
+        <p class="node-desc">Continuous monitoring of Microsoft technical updates and preview tracks.</p>
+        <div class="node-pill-list">
+          <div class="node-pill-item">✦ MS Learn Docs & Roadmaps</div>
+          <div class="node-pill-item">✦ Official MCP GitHub Repos</div>
+          <div class="node-pill-item">✦ Release Wave Documents</div>
+        </div>
+      </div>
+
+      <!-- Node 2 -->
+      <div class="node-card" id="node2">
+        <span class="node-step">STAGE 02</span>
+        <h3 class="node-title">Hermes Agent Worker</h3>
+        <p class="node-desc">Autonomous background extraction, summarization, and clustering.</p>
+        <div class="node-pill-list">
+          <div class="node-pill-item">✦ Semantic Entity Extraction</div>
+          <div class="node-pill-item">✦ Weekly Signal Clustering</div>
+          <div class="node-pill-item">✦ Draft Pulse Generation</div>
+        </div>
+      </div>
+
+      <!-- Node 3: HITL -->
+      <div class="node-card active-hitl" id="node3">
+        <div class="hitl-banner">HUMAN-IN-THE-LOOP (ABHI)</div>
+        <span class="node-step" style="color:#38BDF8;">STAGE 03 · VERIFICATION</span>
+        <h3 class="node-title">Isolated Sandbox Lab</h3>
+        <p class="node-desc">Every pattern tested hands-on in real enterprise sandboxes before publishing.</p>
+        <div class="node-pill-list">
+          <div class="node-pill-item" style="border-color: rgba(56,189,248,0.3); color:#38BDF8;">✔ Live Code & API Testing</div>
+          <div class="node-pill-item" style="border-color: rgba(56,189,248,0.3); color:#38BDF8;">✔ Zero Hallucination Gate</div>
+          <div class="node-pill-item" style="border-color: rgba(56,189,248,0.3); color:#38BDF8;">✔ Editorial Sign-Off</div>
+        </div>
+      </div>
+
+      <!-- Node 4 -->
+      <div class="node-card" id="node4">
+        <span class="node-step">STAGE 04</span>
+        <h3 class="node-title">neural365 Hub</h3>
+        <p class="node-desc">Enterprise-proven signals delivered across visuals, audio, and sandboxes.</p>
+        <div class="node-pill-list">
+          <div class="node-pill-item">⚡ The Pulse Weekly Radar</div>
+          <div class="node-pill-item">⚡ 60s Neural Video Shots</div>
+          <div class="node-pill-item">⚡ 3-Min Commute Podcasts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+    window.__timelines["hermes-flow"] = tl;
+
+    // Stagger in nodes
+    tl.fromTo("#node1", 
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" },
+      0.3
+    );
+
+    tl.fromTo("#node2", 
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" },
+      1.5
+    );
+
+    // Emphasize HITL Node (Abhi) with spring
+    tl.fromTo("#node3", 
+      { opacity: 0, y: 40, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1.03, duration: 1.0, ease: "back.out(1.5)" },
+      3.2
+    );
+
+    // Normal scale settle
+    tl.to("#node3", {
+      scale: 1.0,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 4.2);
+
+    tl.fromTo("#node4", 
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" },
+      5.2
+    );
+
+    // Ambient pulse on HITL border
+    tl.to("#node3", {
+      borderColor: "rgba(129, 140, 248, 0.9)",
+      boxShadow: "0 0 45px rgba(129, 140, 248, 0.35)",
+      duration: 1.2,
+      yoyo: true,
+      repeat: 2,
+      ease: "sine.inOut"
+    }, 6.0);
+  </script>
+</body>
+</html>

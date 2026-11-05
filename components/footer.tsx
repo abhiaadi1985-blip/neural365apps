@@ -37,7 +37,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="wrap">
         <div className="legal">
-          © 2026 neural365 Community. Independent community hub — not an official Microsoft product.
+          © 2026 neural365 COMMUNITY. Independent community hub — not an official Microsoft product.
           Pulse feed content is aggregated and summarised from public sources for educational purposes;
           always confirm against official Microsoft documentation before making implementation decisions.
         </div>
@@ -48,6 +48,9 @@ export default function Footer() {
             </Link>
           ))}
           <Link href="/pulse">Pulse</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/guides">Guides</Link>
+          <a href="/feed.xml" target="_blank" rel="noopener noreferrer">RSS</a>
           {isSignedIn ? (
             <Link href="/account">Account</Link>
           ) : (

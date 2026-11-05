@@ -39,3 +39,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# media & local video/audio editing assets (hosted in Supabase Storage)
+/output/
+/assets/
+/public/cap_segments/
+/public/media/
+/public/presenter/
+/public/screenshots/
+/public/*.mp4
+/public/*.wav
+/public/*.mp3
+/public/teleprompter*.html
+*.mp4
+*.wav
+*.mp3
+*.mov
+*.m4a
+
+# local antigravity / editor cache
+.antigravity/
+

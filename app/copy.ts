@@ -3,17 +3,24 @@
 export const landing = {
   hero: {
     eyebrow: 'Community hub for Dynamics 365 & Power Platform AI',
-    h1:      'Master Microsoft AI Agents & ERP. Hands-on.',
-    lead:    'Your ultimate community hub for upcoming Dynamics 365, Dataverse, and Power Platform AI features. Skip the dry documentation — learn through interactive guides, video shorts, and real-world execution.',
+    h1:      'Explore Microsoft AI Agents & ERP — Together.',
+    lead:    'Your agentic community hub for upcoming Dynamics 365, Dataverse, and Power Platform AI features. Skip the dry documentation — learn through interactive guides, video shorts, and real-world execution.',
     ctaPrimary:   'Explore latest AI features',
-    ctaSecondary: '▶ Watch 2-min platform intro',
+    ctaSecondary: '2min Intro about the community',
   },
 
   pulse: {
     eyebrow:  'The Pulse',
     h2:       "What's new, what's coming, what's shifting underneath.",
-    cadence:  'Refreshed automatically every 3 days from Microsoft Learn, release wave roadmaps, public preview blogs, and trusted community sources.',
+    cadence:  'Refreshed weekly from Microsoft Learn, release wave roadmaps, public preview blogs, and trusted community sources.',
     seeAll:   'See all →',
+  },
+
+  blog: {
+    eyebrow: 'In-Depth Analysis & Guides',
+    h2:      'Deep dives into the Microsoft AI + ERP ecosystem.',
+    lead:    'Long-form architectural blueprints, hands-on configuration guides, and strategic insights crafted by community practitioners.',
+    seeAll:  'View all articles →',
   },
 
   multimedia: {

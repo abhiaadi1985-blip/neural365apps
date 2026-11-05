@@ -1,0 +1,18 @@
+{
+  "aroll": "assets/raw/abhi_video_01.mp4",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "audio_mastering": true,
+  "cuts": [
+    {
+      "clip": "assets/broll/template-showcase.mp4",
+      "start": 5.0,
+      "end": 15.0,
+      "transition": "fade",
+      "mode": "fullscreen"
+    }
+  ]
+}

@@ -21,14 +21,19 @@ export interface RawItem {
 }
 
 export interface PulseItem {
-  title:        string
-  summary:      string
-  lane:         Lane
-  pillar:       Pillar
-  source_name:  string
-  source_url:   string
-  published_at: string
-  dedupe_hash:  string
+  title:              string
+  summary:            string
+  lane:               Lane
+  pillar:             Pillar
+  source_name:        string
+  source_url:         string
+  published_at:       string
+  dedupe_hash:        string
+  content_md?:        string
+  demo_scenario_md?:  string
+  podcast_audio_url?: string
+  short_video_url?:   string
+  status?:            'draft' | 'media_pending' | 'live'
 }
 
 // ── Step 1: Deduplicate ────────────────────────────────────────────────────
@@ -130,3 +135,87 @@ export async function writeToApi(items: PulseItem[]): Promise<{ inserted: number
 
   return res.json()
 }
+
+// ── Hermes / n8n Blog Post Ingestion ─────────────────────────────────────────
+export interface HermesBlogItem {
+  slug:                string
+  title:               string
+  subtitle?:           string
+  summary:             string
+  body_md:             string
+  pillar:              Pillar
+  tags?:               string[]
+  author_name?:        string
+  hero_image_url?:     string
+  estimated_read_min?: number
+  featured?:           boolean
+  status?:             'draft' | 'media_pending' | 'live'
+  podcast_audio_url?:  string
+  short_video_url?:    string
+  source_url?:         string
+  source_name?:        string
+  dedupe_hash?:        string
+  published_at?:       string // ISO 8601
+}
+
+export async function writeBlogToApi(items: HermesBlogItem[]): Promise<{ inserted: number; received: number }> {
+  const baseUrl = process.env.HERMES_BASE_URL ?? 'http://localhost:3000'
+  const secret  = process.env.HERMES_INGEST_SECRET
+
+  if (!secret) throw new Error('HERMES_INGEST_SECRET not set')
+  if (items.length === 0) return { inserted: 0, received: 0 }
+
+  const res = await fetch(`${baseUrl}/api/hermes/blog-ingest`, {
+    method:  'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${secret}`,
+    },
+    body: JSON.stringify({ items }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Blog ingest API error ${res.status}: ${text}`)
+  }
+
+  return res.json()
+}
+
+// ── Hermes / n8n Media Ingestion (Shorts & Podcasts) ─────────────────────────
+export interface HermesMediaUpdate {
+  target:             'pulse' | 'blog'
+  identifier: {
+    id?:          string
+    dedupe_hash?: string
+    slug?:        string
+  }
+  podcast_audio_url?: string | null
+  short_video_url?:   string | null
+  status?:            'draft' | 'media_pending' | 'live'
+}
+
+export async function writeMediaToApi(updates: HermesMediaUpdate[]): Promise<{ updated: number; received: number }> {
+  const baseUrl = process.env.HERMES_BASE_URL ?? 'http://localhost:3000'
+  const secret  = process.env.HERMES_INGEST_SECRET
+
+  if (!secret) throw new Error('HERMES_INGEST_SECRET not set')
+  if (updates.length === 0) return { updated: 0, received: 0 }
+
+  const res = await fetch(`${baseUrl}/api/hermes/media-ingest`, {
+    method:  'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${secret}`,
+    },
+    body: JSON.stringify({ updates }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Media ingest API error ${res.status}: ${text}`)
+  }
+
+  return res.json()
+}
+

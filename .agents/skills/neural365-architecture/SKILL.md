@@ -60,9 +60,37 @@ source_url     text
 published_at   timestamptz
 ingested_at    timestamptz default now()
 dedupe_hash    text unique
-status         text  -- 'draft' | 'live' (added in migration 002)
+status         text  -- 'draft' | 'media_pending' | 'live'
 content_md     text  -- Long-form blog post (nullable)
 demo_scenario_md text -- Hands-on demo example (nullable)
+podcast_audio_url text
+short_video_url   text
+```
+
+## Supabase Schema: `blog_posts`
+
+```sql
+id                 uuid primary key default gen_random_uuid()
+slug               text not null unique
+title              text not null
+subtitle           text
+summary            text not null
+body_md            text not null
+pillar             text not null  -- 'd365-fo' | 'dataverse-power-platform' | 'copilot-ai-agents' | 'industry-solutions'
+tags               text[] not null default '{}'
+author_name        text not null default 'neural365'
+hero_image_url     text
+estimated_read_min int
+featured           boolean not null default false
+status             text not null default 'draft' check (status in ('draft', 'media_pending', 'live'))
+podcast_audio_url  text
+short_video_url    text
+source_url         text
+source_name        text
+dedupe_hash        text unique
+published_at       timestamptz
+created_at         timestamptz default now()
+updated_at         timestamptz default now()
 ```
 
 ## Supabase Schema: `profiles`
@@ -90,33 +118,43 @@ Root `proxy.ts` (Next.js 16 convention, replaces `middleware.ts`) intercepts `/a
 2. Calls `supabase.auth.getUser()` — if no user, redirect to `/admin/login`
 3. Queries `profiles` for `role = 'admin'` — if not admin, sign out and redirect
 
-## Hermes Pipeline Flow
+## Hermes & n8n Pipeline Flow
 
 ```
-Firecrawl (scrape Microsoft sources every 3 days)
-  └─▶ Gemini generates: summary + content_md + demo_scenario_md
-        └─▶ Saved to Supabase with status='draft'
-              └─▶ /admin/review — Human edits/approves text
-                    └─▶ status → 'media_pending'
-                          └─▶ Open Notebook (Docker) generates podcast + video
+Pulse Flow:
+Microsoft sources / Hermes scrape
+  └─▶ POST /api/hermes/ingest (status='draft', optional podcast/video URLs)
+        └─▶ /admin/review — Human edits/approves text
+              └─▶ status → 'media_pending'
+                    └─▶ Open Notebook / n8n / media worker generates podcast + video
+                          └─▶ POST /api/hermes/media-ingest (attaches URLs)
                                 └─▶ /admin/media — Human approves media
-                                      └─▶ status → 'live'
-                                            └─▶ Visible on /pulse feed
+                                      └─▶ status → 'live' (visible on /pulse)
+
+Blog Flow:
+Hermes / n8n in-depth scraper & generator
+  └─▶ POST /api/hermes/blog-ingest (status='draft', optional podcast/video URLs)
+        └─▶ /admin/blog-review — Human edits/approves text
+              └─▶ status → 'media_pending'
+                    └─▶ Open Notebook / n8n / video worker generates media
+                          └─▶ POST /api/hermes/media-ingest (attaches URLs)
+                                └─▶ /admin/blog-media — Human approves media
+                                      └─▶ status → 'live' (visible on /blog & pillar pages)
 ```
 
 ## Pillar Pages
 - `/d365-fo`, `/dataverse-power-platform`, `/copilot-ai-agents`, `/industry-solutions`
-- Each pillar page imports `SEED_PULSE` from `lib/seed-pulse.ts` and filters by `pillar`.
+- Each pillar page queries Supabase for `pulse_items` and `blog_posts` with fallbacks to `SEED_PULSE` and `SEED_BLOG`.
 - Do NOT maintain separate local arrays in pillar pages.
 
-## Pulse Detail Page Pattern
+## Pulse & Blog Detail Page Pattern
 ```ts
 // Always use force-dynamic — cannot use generateStaticParams with cookies()
 export const dynamic = 'force-dynamic'
 
-// Always fall back to SEED_PULSE if DB is empty
-let { data: item } = await supabase.from('pulse_items').select('*').eq('id', id).single()
-if (!item) item = SEED_PULSE.find(i => i.id === id) || null
-if (!item) notFound()
+// Always fall back to SEED_BLOG if DB is empty
+let { data: post } = await supabase.from('blog_posts').select('*').eq('slug', slug).single()
+if (!post) post = SEED_BLOG.find(p => p.slug === slug) || null
+if (!post) notFound()
 ```
 

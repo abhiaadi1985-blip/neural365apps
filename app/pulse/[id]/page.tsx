@@ -9,6 +9,9 @@ import { cookies } from 'next/headers'
 import { laneLabels } from '@/lib/design-tokens'
 import type { Lane } from '@/lib/design-tokens'
 import { SEED_PULSE } from '@/lib/seed-pulse'
+import CommentSection from '@/components/comment-section'
+import BookmarkButton from '@/components/bookmark-button'
+import { getComments } from '@/lib/comments/actions'
 
 const pillarMeta: Record<string, { label: string; href: string }> = {
   'd365-fo':                  { label: 'D365 ERP',                  href: '/d365-fo' },
@@ -83,6 +86,8 @@ export default async function PulseDetailPage({
     related = SEED_PULSE.filter(i => i.pillar === item!.pillar && i.id !== item!.id).slice(0, 3)
   }
 
+  const comments = await getComments('pulse', item.id)
+
   return (
     <>
       {/* ── Hero ── */}
@@ -98,8 +103,8 @@ export default async function PulseDetailPage({
             <span style={{ color: 'var(--text)' }}>Detail</span>
           </div>
 
-          {/* Lane + Pillar badges */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+          {/* Lane + Pillar badges + Bookmark Button */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18, alignItems: 'center' }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 5,
               background: `color-mix(in srgb, ${laneColor} 12%, transparent)`,
@@ -121,6 +126,14 @@ export default async function PulseDetailPage({
             }}>
               {pillar.label} ↗
             </Link>
+            <div style={{ marginLeft: 'auto' }}>
+              <BookmarkButton
+                contentType="pulse"
+                contentId={item.id}
+                title={item.title}
+                pillar={item.pillar}
+              />
+            </div>
           </div>
 
           <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.8rem)', fontWeight: 800, maxWidth: 780, lineHeight: 1.2 }}>
@@ -141,7 +154,7 @@ export default async function PulseDetailPage({
 
       {/* ── Body ── */}
       <section style={{ padding: '48px 0 80px' }}>
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr min(340px, 35%)', gap: 48, alignItems: 'start' }}>
+        <div className="wrap detail-layout-grid">
 
           {/* Main content */}
           <div className="pulse-detail-content">
@@ -246,7 +259,15 @@ export default async function PulseDetailPage({
               </a>
             )}
 
-            <div style={{ marginTop: 16 }}>
+            {/* Community Discussion */}
+            <CommentSection
+              contentType="pulse"
+              contentId={item.id}
+              initialComments={comments}
+              revalidateUrl={`/pulse/${item.id}`}
+            />
+
+            <div style={{ marginTop: 28, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
               <Link href="/pulse" style={{ fontSize: '0.86rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace' }}>
                 ← Back to Pulse feed
               </Link>

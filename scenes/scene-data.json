@@ -1,0 +1,54 @@
+{
+  "theme": {
+    "bg": "#090D16",
+    "surface": "#111827",
+    "border": "rgba(255, 255, 255, 0.08)",
+    "text": "#F9FAFB",
+    "textMuted": "#9CA3AF",
+    "cyan": "#38BDF8",
+    "indigo": "#818CF8",
+    "emerald": "#34D399",
+    "rose": "#F43F5E"
+  },
+  "durationSeconds": 10.0,
+  "fps": 30,
+  "phase1": {
+    "badge": "#01",
+    "category": "LOCAL AUTOMATION PIPELINE",
+    "title": "Zero-Dollar Local Video Engine",
+    "subtitle": "High-velocity B-roll, automated silence trimming & broadcast audio mastering"
+  },
+  "phase2": {
+    "terminal": {
+      "title": "bash — powershell",
+      "command": "npx skills add heygen-com/hyperframes --full-depth",
+      "outputLines": [
+        "✔ Cloning repository... done",
+        "✔ Security audit: 14 skills verified (0 alerts)",
+        "✔ Installed skills into .agents/skills/",
+        "  → code-slice-hero, glass-shard-title, cuboid-carousel"
+      ]
+    },
+    "comparison": {
+      "left": {
+        "title": "SKILL OFF: MANUAL TIMELINE",
+        "badge": "GENERIC WORKFLOW",
+        "status": "45 Mins Manual Cuts",
+        "metrics": ["Manual silence scrubbing", "Desynced lip voiceover", "Static flat diagrams"],
+        "accent": "#F43F5E"
+      },
+      "right": {
+        "title": "SKILL ON: HYPERFRAMES STUDIO",
+        "badge": "POLISHED AUTOMATION",
+        "status": "100% Programmatic",
+        "metrics": ["Auto-editor silence detection", "Faster-Whisper word timestamps", "Animated glassmorphic SVG charts"],
+        "accent": "#38BDF8"
+      }
+    }
+  },
+  "phase3": {
+    "calloutBadge": "KEY TAKEAWAY",
+    "metric": "85% FASTER PRODUCTION",
+    "summary": "100% free, local-first zero-dollar programmatic video engine ready for all neural365 video assets."
+  }
+}

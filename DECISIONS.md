@@ -35,6 +35,6 @@ This file documents all architectural decisions, agent assumptions, and items fl
 
 - **[HERMES SOURCES]** `community-blogs.config.ts` pre-populated with 3 starter URLs. Add/remove trusted community sources before first cron run. Verify each source's robots.txt and ToS before adding.
 
-- **[HERMES WATERMARK]** Current implementation uses a fixed 4-day lookback. For production, persist a per-source `last_run_at` watermark in a JSON file or Supabase table to avoid re-processing on every run.
+- **[HERMES WATERMARK]** Current implementation uses a fixed 8-day lookback for weekly cron runs (`0 6 * * 1` Mondays at 06:00 UTC). For production, persist a per-source `last_run_at` watermark in a JSON file or Supabase table to avoid re-processing on every run.
 
 - **[NEWSLETTER CONFIRMATION]** Subscribers are inserted with `confirmed: false`. Double-opt-in email flow not yet implemented. Add a confirmation email step before sending any bulk emails to subscribers.
