@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
+import { createAdminClient } from '@/lib/supabase/admin'
+
 
 export const runtime = 'nodejs'
 
@@ -49,8 +49,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'updates array is required' }, { status: 400 })
   }
 
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+
+  const supabase = createAdminClient()
+  if (!supabase) {
+    console.error('[hermes/media-ingest] SUPABASE_SECRET_KEY is not set')
+    return NextResponse.json({ error: 'Server misconfiguration: admin client unavailable' }, { status: 500 })
+  }
   let updatedCount = 0
 
   for (const item of payload.updates) {

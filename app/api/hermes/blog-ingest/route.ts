@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
+import { createAdminClient } from '@/lib/supabase/admin'
+
 
 export const runtime = 'nodejs'
 
@@ -55,8 +55,12 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Insert with dedupe (conflict = skip) ───────────────────────────────
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+
+  const supabase = createAdminClient()
+  if (!supabase) {
+    console.error('[hermes/blog-ingest] SUPABASE_SECRET_KEY is not set')
+    return NextResponse.json({ error: 'Server misconfiguration: admin client unavailable' }, { status: 500 })
+  }
   const { data, error } = await supabase
     .from('blog_posts')
     .upsert(payload.items, { onConflict: 'dedupe_hash', ignoreDuplicates: true })
