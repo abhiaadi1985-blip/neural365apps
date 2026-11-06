@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSafeRedirectUrl } from '@/utils/url'
 
 export const runtime = 'nodejs'
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!email || !password) {
-    return NextResponse.redirect(new URL('/sign-in?error=missing_fields', req.url))
+    return NextResponse.redirect(getSafeRedirectUrl('/sign-in?error=missing_fields', req))
   }
 
   const cookieStore = await cookies()
@@ -47,8 +48,8 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error('[auth/sign-in]', error.message)
-    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(error.message)}`, req.url))
+    return NextResponse.redirect(getSafeRedirectUrl(`/sign-in?error=${encodeURIComponent(error.message)}`, req))
   }
 
-  return NextResponse.redirect(new URL('/account', req.url))
+  return NextResponse.redirect(getSafeRedirectUrl('/account', req))
 }

@@ -7,16 +7,92 @@ import ModalPlayer from '@/components/modal-player'
 import { landing } from '@/app/copy'
 
 const SEED_SHORTS: MediaItem[] = [
-  { id: 's1', kind: 'short', title: 'Set up a Copilot Studio agent in Dataverse', durationSec: 58,  href: '/guides/copilot-studio-dataverse' },
-  { id: 's2', kind: 'short', title: 'Enable Finance variance narratives',          durationSec: 62,  href: '/guides/finance-variance-narratives' },
-  { id: 's3', kind: 'short', title: 'Wire a virtual table to an external API',     durationSec: 54,  href: '/guides/virtual-table-api' },
-  { id: 's4', kind: 'short', title: 'Configure Supply Chain anomaly alerts',       durationSec: 60,  href: '/guides/supply-chain-alerts' },
+  {
+    id: 's-ns03',
+    kind: 'short',
+    badge: 'NS03',
+    category: 'Agent Architecture',
+    title: 'D365 Procurement Agent: Blast Radius & Pegging Analysis',
+    durationSec: 81,
+    href: '/guides/procurement-agent-impact-analysis',
+    src: '/shorts/ns03-procurement-agent.mp4',
+    thumbnailUrl: '/shorts/ns03-thumb.png',
+  },
+  {
+    id: 's1',
+    kind: 'short',
+    badge: 'NS01',
+    category: 'Orchestration Explainer',
+    title: 'Multi-Agent Intent Routing & Dynamic Fallbacks in Copilot Studio',
+    durationSec: 92,
+    href: '/guides/copilot-studio-dataverse',
+  },
+  {
+    id: 's2',
+    kind: 'short',
+    badge: 'NS02',
+    category: 'AI Reasoning Breakdown',
+    title: 'How Autonomous Finance Agents Reason Over Ledger Variances',
+    durationSec: 76,
+    href: '/guides/finance-variance-narratives',
+  },
+  {
+    id: 's3',
+    kind: 'short',
+    badge: 'NS04',
+    category: 'Data Platform Deep Dive',
+    title: 'Dataverse Virtual Tables & External REST APIs Demystified',
+    durationSec: 85,
+    href: '/guides/virtual-table-api',
+  },
+  {
+    id: 's4',
+    kind: 'short',
+    badge: 'NS05',
+    category: 'Process Automation',
+    title: 'Supply Chain Anomaly Detection & Autonomous Escalation Gates',
+    durationSec: 70,
+    href: '/guides/supply-chain-alerts',
+  },
 ]
 
 const SEED_PODCASTS: MediaItem[] = [
-  { id: 'p1', kind: 'podcast', title: 'Why reconciliation agents need a human gate',    durationSec: 312, href: '/guides/reconciliation-agents' },
-  { id: 'p2', kind: 'podcast', title: 'What the new Dataverse retention policy means for your data',  durationSec: 285, href: '/guides/fabric-retention' },
-  { id: 'p3', kind: 'podcast', title: 'Cross-app agent handoffs, explained',             durationSec: 330, href: '/guides/agent-handoffs' },
+  {
+    id: 'p-deep-1',
+    kind: 'podcast',
+    badge: 'DEEP DIVE',
+    category: 'Roundtable Analysis',
+    title: 'Architecting Autonomous Enterprise Agents: Memory, Grounding & Safety Gates',
+    durationSec: 1042,
+    href: '/guides/autonomous-agents-architecture',
+  },
+  {
+    id: 'p1',
+    kind: 'podcast',
+    badge: 'MICRO-BRIEF',
+    category: 'Executive Strategy',
+    title: 'Why reconciliation agents need an autonomous human gate',
+    durationSec: 294,
+    href: '/guides/reconciliation-agents',
+  },
+  {
+    id: 'p-deep-2',
+    kind: 'podcast',
+    badge: 'DEEP DIVE',
+    category: 'Data Platform Debate',
+    title: 'Dataverse to Microsoft Fabric Direct Lake: Storage Governance & Cost Model',
+    durationSec: 915,
+    href: '/guides/fabric-retention',
+  },
+  {
+    id: 'p3',
+    kind: 'podcast',
+    badge: 'MICRO-BRIEF',
+    category: 'Ecosystem Shift',
+    title: 'Cross-app agent handoffs: Dynamics 365 meets Microsoft 365 Copilot',
+    durationSec: 330,
+    href: '/guides/agent-handoffs',
+  },
 ]
 
 function formatDuration(sec: number): string {
@@ -34,12 +110,14 @@ export default function MultimediaSection({
 }) {
   const [modalSrc, setModalSrc] = useState<string | null>(null)
   const [modalKind, setModalKind] = useState<'video' | 'audio'>('video')
+  const [modalIsVertical, setModalIsVertical] = useState(false)
   const [modalLabel, setModalLabel] = useState(landing.modal.label)
   const [modalOpen, setModalOpen] = useState(false)
 
   function openMediaItem(item: MediaItem) {
-    setModalSrc(null) // placeholder until direct streaming CDN links exist
+    setModalSrc(item.src || null)
     setModalKind(item.kind === 'podcast' ? 'audio' : 'video')
+    setModalIsVertical(item.kind === 'short')
     setModalLabel(`${item.title} · ${formatDuration(item.durationSec)}`)
     setModalOpen(true)
   }
@@ -76,6 +154,7 @@ export default function MultimediaSection({
       <ModalPlayer
         src={modalSrc}
         kind={modalKind}
+        isVertical={modalIsVertical}
         label={modalLabel}
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

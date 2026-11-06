@@ -9,10 +9,18 @@ interface ModalPlayerProps {
   kind?:  'video' | 'audio'
   label:  string
   isOpen?: boolean
+  isVertical?: boolean
   onClose: () => void
 }
 
-export default function ModalPlayer({ src, kind = 'video', label, isOpen: propIsOpen, onClose }: ModalPlayerProps) {
+export default function ModalPlayer({
+  src,
+  kind = 'video',
+  label,
+  isOpen: propIsOpen,
+  isVertical = false,
+  onClose,
+}: ModalPlayerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const closeRef   = useRef<HTMLButtonElement>(null)
   const isOpen = propIsOpen !== undefined ? propIsOpen : !!src
@@ -45,14 +53,34 @@ export default function ModalPlayer({ src, kind = 'video', label, isOpen: propIs
       aria-label={label}
       onClick={e => { if (e.target === overlayRef.current) onClose() }}
     >
-      <div className="modal-box">
-        <div className="modal-player">
+      <div
+        className="modal-box"
+        style={
+          isVertical
+            ? { maxWidth: 420, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }
+            : undefined
+        }
+      >
+        <div
+          className="modal-player"
+          style={
+            isVertical
+              ? { aspectRatio: '9 / 16', maxHeight: '72vh', background: '#000' }
+              : undefined
+          }
+        >
           {src && kind === 'video' ? (
             <video
               src={src}
               controls
               autoPlay
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              playsInline
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: isVertical ? 'contain' : 'cover',
+                background: '#000',
+              }}
             />
           ) : src && kind === 'audio' ? (
             <div style={{ padding: '32px', textAlign: 'center', width: '100%' }}>

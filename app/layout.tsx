@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'neural365 COMMUNITY — Master Microsoft AI Agents & ERP, hands-on',
     description:
-      'Interactive guides, Neural Shorts, and Micro-podcasts for the D365 & Power Platform ecosystem.',
+      'Interactive guides, Neural Shorts, and Podcasts for the D365 & Power Platform ecosystem.',
     type: 'website',
     siteName: 'neural365 COMMUNITY',
     url: siteUrl,

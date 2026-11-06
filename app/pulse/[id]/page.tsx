@@ -172,7 +172,7 @@ export default async function PulseDetailPage({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--azure)' }}>
                   <span>🎙️</span>
-                  <span style={{ fontWeight: 600 }}>MICRO-PODCAST (2-MIN AI DEBRIEF)</span>
+                  <span style={{ fontWeight: 600 }}>PODCAST (TOPIC DEBRIEF &amp; BRIEFING)</span>
                 </div>
                 <audio controls style={{ width: '100%' }} key={item.podcast_audio_url}>
                   <source src={item.podcast_audio_url} type="audio/mpeg" />
@@ -191,7 +191,7 @@ export default async function PulseDetailPage({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--lane-new)', marginBottom: 12 }}>
                   <span>🎬</span>
-                  <span style={{ fontWeight: 600 }}>NEURAL SHORT DEMO (HANDS-ON WALKTHROUGH)</span>
+                  <span style={{ fontWeight: 600 }}>NEURAL SHORT (VISUAL EXPLAINER &amp; BREAKDOWN)</span>
                 </div>
                 <video controls style={{ width: '100%', maxHeight: 420, borderRadius: 8, background: '#000' }} key={item.short_video_url}>
                   <source src={item.short_video_url} type="video/mp4" />

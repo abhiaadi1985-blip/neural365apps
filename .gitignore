@@ -60,3 +60,6 @@ next-env.d.ts
 # local antigravity / editor cache
 .antigravity/
 
+
+# supabase cli temporary cache
+supabase/.temp/

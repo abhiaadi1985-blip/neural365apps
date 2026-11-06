@@ -61,7 +61,7 @@ export default function GuidesIndexPage() {
           <p style={{ marginTop: 16, maxWidth: 620, color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6 }}>
             We are engineering a curriculum of interactive, step-by-step technical guides
             backed by isolated Microsoft demo sandboxes. Each guide is paired with an inline
-            Neural Short (60-sec config) and a Micro-podcast.
+            Neural Short (visual explainer breakdown) and an audio podcast (topic briefing or deep dive).
           </p>
 
           <div style={{ display: 'flex', gap: 14, marginTop: 28, flexWrap: 'wrap' }}>

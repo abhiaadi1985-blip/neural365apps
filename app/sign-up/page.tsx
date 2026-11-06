@@ -6,7 +6,25 @@ export const metadata: Metadata = {
   description: 'Create your neural365 COMMUNITY account to unlock premium D365 & Power Platform guides.',
 }
 
-export default function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>
+}) {
+  const params = await searchParams
+  const error = params?.error
+
+  let displayError = ''
+  if (error === 'missing_fields') {
+    displayError = 'Please enter both your email and password.'
+  } else if (error === 'password_too_short') {
+    displayError = 'Password must be at least 8 characters long.'
+  } else if (error === 'payments_not_configured') {
+    displayError = 'Payment system is being configured. Please check back shortly.'
+  } else if (error) {
+    displayError = decodeURIComponent(error)
+  }
+
   return (
     <section style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>
       <div style={{
@@ -18,6 +36,21 @@ export default function SignUpPage() {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 28 }}>
           Join the neural365 COMMUNITY. Free to start.
         </p>
+
+        {displayError && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#ef4444',
+            padding: '12px 14px',
+            borderRadius: 8,
+            fontSize: '0.85rem',
+            marginBottom: 20,
+            lineHeight: 1.4,
+          }}>
+            {displayError}
+          </div>
+        )}
 
         <form action="/api/auth/sign-up" method="POST" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>

@@ -26,14 +26,14 @@ export const landing = {
   multimedia: {
     eyebrow: 'Interactive multimedia hub',
     h2:      'Learn it by watching it run, not just reading about it.',
-    lead:    'Every guide pairs a written walkthrough with a short video or audio breakdown — so you can configure along, or just listen on your commute.',
+    lead:    'Complex enterprise topics, agent architectures, and real configurations distilled into intuitive visual explainers and commute-ready audio.',
     shorts: {
-      title:   'Neural Shorts — 60-second configs',
-      cadence: 'vertical · hands-on',
+      title:   'Neural Shorts — Visual Concepts & Hands-on Breakdowns',
+      cadence: 'vertical · educational & practical',
     },
     podcasts: {
-      title:   'Micro-podcasts — 5-minute breakdowns',
-      cadence: 'audio · strategic context',
+      title:   'Neural Podcasts — Deep Dives & Topic Briefs',
+      cadence: 'audio · long-form & micro-briefs',
     },
   },
 

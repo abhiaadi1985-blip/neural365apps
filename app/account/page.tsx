@@ -173,12 +173,9 @@ export default async function AccountPage() {
             </div>
           ) : (
             <div>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 0 }}>
                 You are on the free community tier with unlimited access to Pulse updates and Blog deep dives.
               </p>
-              <Link href="/api/checkout" className="btn btn-primary btn-sm">
-                Upgrade to Premium Lab Sandboxes
-              </Link>
             </div>
           )}
         </div>

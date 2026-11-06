@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSafeRedirectUrl } from '@/utils/url'
 
 export const runtime = 'nodejs'
 
@@ -9,7 +10,6 @@ export async function POST(req: NextRequest) {
   let password = ''
   const contentType = req.headers.get('content-type') || ''
   if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
-
     const form = await req.formData().catch(() => null)
     email = ((form?.get('email') as string) ?? '').trim()
     password = ((form?.get('password') as string) ?? '')
@@ -25,11 +25,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (!email || !password) {
-    return NextResponse.redirect(new URL('/sign-up?error=missing_fields', req.url))
+    return NextResponse.redirect(getSafeRedirectUrl('/sign-up?error=missing_fields', req))
   }
 
   if (password.length < 8) {
-    return NextResponse.redirect(new URL('/sign-up?error=password_too_short', req.url))
+    return NextResponse.redirect(getSafeRedirectUrl('/sign-up?error=password_too_short', req))
   }
 
   const cookieStore = await cookies()
@@ -47,14 +47,22 @@ export async function POST(req: NextRequest) {
     }
   )
 
-  const { error } = await supabase.auth.signUp({ email, password })
+  const callbackUrl = `${getSafeRedirectUrl('/auth/callback', req).origin}/auth/callback`
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: callbackUrl,
+    },
+  })
 
   if (error) {
     console.error('[auth/sign-up]', error.message)
-    return NextResponse.redirect(new URL(`/sign-up?error=${encodeURIComponent(error.message)}`, req.url))
+    return NextResponse.redirect(getSafeRedirectUrl(`/sign-up?error=${encodeURIComponent(error.message)}`, req))
   }
 
   // Supabase sends an email confirmation link by default.
   // Redirect to a "check your email" message.
-  return NextResponse.redirect(new URL('/sign-in?message=check_email', req.url))
+  return NextResponse.redirect(getSafeRedirectUrl('/sign-in?message=check_email', req))
 }

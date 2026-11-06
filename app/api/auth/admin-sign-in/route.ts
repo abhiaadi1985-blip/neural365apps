@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSafeRedirectUrl } from '@/utils/url'
 
 export const runtime = 'nodejs'
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!email || !password) {
-    return NextResponse.redirect(new URL('/admin/login?error=missing_fields', req.url))
+    return NextResponse.redirect(getSafeRedirectUrl('/admin/login?error=missing_fields', req))
   }
 
   const cookieStore = await cookies()
@@ -47,13 +48,13 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error('[auth/admin-sign-in]', error.message)
-    return NextResponse.redirect(new URL(`/admin/login?error=${encodeURIComponent(error.message)}`, req.url))
+    return NextResponse.redirect(getSafeRedirectUrl(`/admin/login?error=${encodeURIComponent(error.message)}`, req))
   }
 
   // Verify the user has admin role
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.redirect(new URL('/admin/login?error=auth_failed', req.url))
+    return NextResponse.redirect(getSafeRedirectUrl('/admin/login?error=auth_failed', req))
   }
 
   const { data: profile } = await supabase
@@ -65,8 +66,8 @@ export async function POST(req: NextRequest) {
   if (!profile || profile.role !== 'admin') {
     // Not an admin — sign them out and reject
     await supabase.auth.signOut()
-    return NextResponse.redirect(new URL('/admin/login?error=not_admin', req.url))
+    return NextResponse.redirect(getSafeRedirectUrl('/admin/login?error=not_admin', req))
   }
 
-  return NextResponse.redirect(new URL('/admin', req.url))
+  return NextResponse.redirect(getSafeRedirectUrl('/admin', req))
 }

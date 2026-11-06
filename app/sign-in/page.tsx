@@ -6,7 +6,22 @@ export const metadata: Metadata = {
   description: 'Sign in to your neural365 COMMUNITY account to access premium guides.',
 }
 
-export default function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string; message?: string }>
+}) {
+  const params = await searchParams
+  const error = params?.error
+  const message = params?.message
+
+  let displayError = ''
+  if (error === 'missing_fields') {
+    displayError = 'Please enter both your email and password.'
+  } else if (error) {
+    displayError = decodeURIComponent(error)
+  }
+
   return (
     <section style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>
       <div style={{
@@ -18,6 +33,36 @@ export default function SignInPage() {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 28 }}>
           Sign in to access your guides and subscription.
         </p>
+
+        {displayError && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#ef4444',
+            padding: '12px 14px',
+            borderRadius: 8,
+            fontSize: '0.85rem',
+            marginBottom: 20,
+            lineHeight: 1.4,
+          }}>
+            {displayError}
+          </div>
+        )}
+
+        {message === 'check_email' && (
+          <div style={{
+            background: 'rgba(47, 134, 255, 0.1)',
+            border: '1px solid rgba(47, 134, 255, 0.3)',
+            color: 'var(--azure)',
+            padding: '12px 14px',
+            borderRadius: 8,
+            fontSize: '0.85rem',
+            marginBottom: 20,
+            lineHeight: 1.4,
+          }}>
+            Account created! Please check your email to confirm your account before signing in.
+          </div>
+        )}
 
         <form action="/api/auth/sign-in" method="POST" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>

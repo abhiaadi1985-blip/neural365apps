@@ -57,7 +57,7 @@ export default async function GuidePage() {
               This guide is in development
             </h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.65, marginBottom: 28 }}>
-              Guides — including inline Neural Shorts and Micro-podcasts — are currently being
+              Guides — including inline Neural Shorts and Podcasts — are currently being
               authored and will be published progressively. Check back soon, or subscribe below
               to get notified when content goes live.
             </p>
@@ -85,7 +85,7 @@ export default async function GuidePage() {
             {[
               'Step-by-step walkthroughs for every Copilot feature',
               'Inline Neural Shorts (short-form videos) embedded in guides',
-              'Micro-podcasts generated via NotebookLM on each topic',
+              'Podcasts (deep dives & micro-briefs) generated via NotebookLM on each topic',
               'Premium deep-dives on advanced ERP and agent configurations',
             ].map((item, i) => (
               <div key={i} style={{

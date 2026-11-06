@@ -276,7 +276,9 @@ export default async function BlogDetailPage({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--azure)' }}>
                   <span>🎙️</span>
-                  <span style={{ fontWeight: 600 }}>MICRO-PODCAST (2-MIN AI DEBRIEF)</span>
+                  <span style={{ fontWeight: 600 }}>
+                    {post.podcast_kind === 'long' ? 'PODCAST (DEEP DIVE ROUNDTABLE)' : 'PODCAST (TOPIC DEBRIEF)'}
+                  </span>
                 </div>
                 <audio controls style={{ width: '100%' }} key={podcastUrl}>
                   <source src={podcastUrl} type="audio/mpeg" />
@@ -296,7 +298,7 @@ export default async function BlogDetailPage({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--lane-new)', marginBottom: 12 }}>
                   <span>🎬</span>
-                  <span style={{ fontWeight: 600 }}>NEURAL SHORT DEMO (HANDS-ON WALKTHROUGH)</span>
+                  <span style={{ fontWeight: 600 }}>NEURAL SHORT (VISUAL EXPLAINER &amp; BREAKDOWN)</span>
                 </div>
                 <video controls style={{ width: '100%', maxHeight: 420, borderRadius: 8, background: '#000' }} key={videoUrl}>
                   <source src={videoUrl} type="video/mp4" />
