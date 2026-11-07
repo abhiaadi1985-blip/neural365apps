@@ -14,6 +14,9 @@ This file documents all architectural decisions, agent assumptions, and items fl
 | D4 | **Rules-based classifier first** | Hermes uses keyword/source-type matching (no LLM per item). Only escalate to LLM classification if rule coverage proves insufficient after real-world testing. |
 | D5 | **Seed data from reference HTML** | The 9 sample cards in `neural365apps_hub_landing.html` are used as seed rows for both landing page preview and the `/pulse` page until Hermes is running live. |
 | D6 | **Naive MDX rendering (MVP)** | Guide `body_mdx` is rendered as pre-wrapped text with media markers replaced inline. Full MDX compilation (remark/rehype pipeline) deferred to post-v1 polish. |
+| D7 | **Multimedia Delivery Strategy (Podcasts via Supabase, Shorts via YouTube)** | Podcasts (.mp3) are stored in Supabase Storage (`pulse-podcasts`) because NotebookLM does not provide embeddable public CDN links, and audio is lightweight (~5-10MB/ep with chapter scrubbing). Shorts (.mp4) are staged in Supabase Storage (`neural-shorts`) strictly for the admin preview queue, then published to YouTube Shorts (`short_video_url` stores the YouTube link) to eliminate video egress bandwidth costs and leverage YouTube discovery. |
+| D8 | **Decoupled Video Worker via Supabase Partial Index** | Local laptop Antigravity CLI worker queries `status = 'media_pending' AND video_brief IS NOT NULL AND short_video_url IS NULL ORDER BY created_at ASC`. Protects against NAT/offline laptop states and avoids polling items awaiting podcasts only. |
+| D9 | **Service-Role Ingestion Layer** | `/api/hermes/*` routes authenticate via `HERMES_INGEST_SECRET` and execute DB operations through `createAdminClient()` (`SUPABASE_SECRET_KEY`), safely bypassing RLS since external agents do not carry browser cookies. |
 
 ---
 

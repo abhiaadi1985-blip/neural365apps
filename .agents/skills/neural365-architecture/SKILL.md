@@ -65,6 +65,11 @@ content_md     text  -- Long-form blog post (nullable)
 demo_scenario_md text -- Hands-on demo example (nullable)
 podcast_audio_url text
 short_video_url   text
+video_brief       jsonb
+render_attempts   int default 0
+render_last_error text
+render_last_attempt_at timestamptz
+created_at        timestamptz default now()
 ```
 
 ## Supabase Schema: `blog_posts`
@@ -85,6 +90,14 @@ featured           boolean not null default false
 status             text not null default 'draft' check (status in ('draft', 'media_pending', 'live'))
 podcast_audio_url  text
 short_video_url    text
+video_brief        jsonb
+podcast_kind       text not null default 'article' check (podcast_kind in ('article', 'long'))
+podcast_duration_sec int
+podcast_chapters   jsonb
+podcast_generated_at timestamptz
+render_attempts    int default 0
+render_last_error  text
+render_last_attempt_at timestamptz
 source_url         text
 source_name        text
 dedupe_hash        text unique

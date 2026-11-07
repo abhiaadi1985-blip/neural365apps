@@ -50,3 +50,9 @@
 - After text approval → `status` moves to `'media_pending'` (triggers Open Notebook / video worker).
 - After media approval → `status` moves to `'live'` (visible on public Pulse feed / Blog feed).
 - The review pages are split into Server Component (fetches DB) and Client Component (handles editing state + server actions).
+
+## Multimedia Pipeline Rules
+- **Podcasts (.mp3)**: Stored in Supabase Storage (`pulse-podcasts` bucket). NotebookLM does not offer public embeds; storing `.mp3` enables custom chapter scrubbing via `podcast_chapters`.
+- **Shorts (.mp4 / YouTube)**: Staged in Supabase Storage (`neural-shorts` bucket) for admin review, then published to YouTube Shorts (`short_video_url` points to YouTube URL on live release) to eliminate heavy video egress bills.
+- **Worker Queue**: Local laptop Antigravity worker queries `status = 'media_pending' AND video_brief IS NOT NULL AND short_video_url IS NULL ORDER BY created_at ASC`.
+- **Hermes Ingestion Endpoints**: `/api/hermes/*` routes use `createAdminClient()` (`SUPABASE_SECRET_KEY`) to safely bypass RLS on server-side agent writes.
