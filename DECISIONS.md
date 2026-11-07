@@ -31,7 +31,7 @@ This file documents all architectural decisions, agent assumptions, and items fl
 
 - **[STRIPE PRICING]** Stripe `PRICE_ID` placeholder in `lib/stripe/index.ts` — insert your actual Stripe Price ID before enabling checkout. Decide pricing tier structure (single vs. multiple tiers) based on hands-on lab testing.
 
-- **[MEDIA]** Neural Shorts (`.mp4`) and Micro-podcasts (`.mp3`) — placeholder players are in place but no real media URLs exist yet. Populate `guides.short_video_url` and `guides.podcast_audio_url` in Supabase once media is produced (Neural Shorts via web curation; Micro-podcasts via NotebookLM).
+- **[MEDIA]** *(Resolved)* Multimedia pipeline is wired end-to-end. Podcasts generated via NotebookLM on VPS (`pulse-podcasts` bucket), Neural Shorts rendered locally via Antigravity into `neural-shorts` for preview, then published to YouTube Shorts (`short_video_url`). Both media types gated by human admin review in `/admin/review` and `/admin/media`.
 
 ### 🟡 Review before enabling features
 
