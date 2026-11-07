@@ -16,12 +16,62 @@
 import { createClient } from '@supabase/supabase-js'
 import * as fs from 'fs'
 import * as path from 'path'
+import { execFileSync } from 'child_process'
+
+// Auto-load .env.local if present
+function loadEnvLocal() {
+  const envPath = path.resolve(process.cwd(), '.env.local')
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/)
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eqIdx = trimmed.indexOf('=')
+      if (eqIdx !== -1) {
+        const key = trimmed.slice(0, eqIdx).trim()
+        const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '')
+        if (!process.env[key]) {
+          process.env[key] = val
+        }
+      }
+    }
+  }
+}
+loadEnvLocal()
+
+function getFfmpegPath(): string {
+  const localFfmpeg = path.resolve(process.cwd(), 'node_modules', '@ffmpeg-installer', 'win32-x64', 'ffmpeg.exe')
+  if (fs.existsSync(localFfmpeg)) return localFfmpeg
+  return 'ffmpeg'
+}
+
+function renderFallbackShortVideo(outputPath: string, pillar: string) {
+  const ffmpeg = getFfmpegPath()
+  const pillarColors: Record<string, string> = {
+    'd365-fo': '0x0d1f36',
+    'dataverse-power-platform': '0x0a2618',
+    'copilot-ai-agents': '0x1c1033',
+    'industry-solutions': '0x26190a',
+  }
+  const bg = pillarColors[pillar] || '0x060a12'
+
+  execFileSync(ffmpeg, [
+    '-y',
+    '-f', 'lavfi', '-i', `color=c=${bg}:s=1080x1920:d=5:r=30`,
+    '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo',
+    '-c:v', 'libx264',
+    '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac',
+    '-shortest',
+    outputPath,
+  ], { stdio: 'pipe' })
+}
 
 // Load environment variables if running directly
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const HERMES_SECRET = process.env.HERMES_INGEST_SECRET
-const SITE_URL = process.env.COMMUNITY_SITE_URL || 'http://localhost:3001'
+const SITE_URL = process.env.COMMUNITY_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'
 
 // YouTube API Credentials (local laptop only)
 const YOUTUBE_CLIENT_ID = process.env.YOUTUBE_CLIENT_ID
@@ -29,8 +79,12 @@ const YOUTUBE_CLIENT_SECRET = process.env.YOUTUBE_CLIENT_SECRET
 const YOUTUBE_REFRESH_TOKEN = process.env.YOUTUBE_REFRESH_TOKEN
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('[Worker Error] Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY in environment.')
+  console.error('[Worker Error] Missing NEXT_PUBLIC_SUPABASE_URL or Supabase Key in environment.')
   process.exit(1)
+}
+
+if (!process.env.SUPABASE_SECRET_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.info('[Worker Info] SUPABASE_SECRET_KEY not found; using publishable key from .env.local.')
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -97,17 +151,13 @@ async function processStage1Render(item: WorkItem) {
   }
   const localFile = path.join(localDir, `${safeSlug}.mp4`)
 
-  // Check if a pre-rendered or template video exists locally, or synthesize placeholder video
+  // Check if a pre-rendered or template video exists locally, or render short MP4
   let fileBuffer: Buffer
-  if (fs.existsSync(localFile)) {
-    fileBuffer = fs.readFileSync(localFile)
-  } else {
-    // If local file not yet rendered, create minimal binary placeholder or trigger hyperframes render
-    console.log(`[Stage 1: Render] Video file not found at ${localFile}. Generating render placeholder...`)
-    // Write placeholder text or minimal mp4 container buffer
-    fileBuffer = Buffer.from(`HyperFrames Render: ${item.title}\nBrief: ${item.video_brief || ''}`)
-    fs.writeFileSync(localFile, fileBuffer)
+  if (!fs.existsSync(localFile)) {
+    console.log(`[Stage 1: Render] Video file not found at ${localFile}. Rendering 1080x1920 MP4 video...`)
+    renderFallbackShortVideo(localFile, safePillar)
   }
+  fileBuffer = fs.readFileSync(localFile)
 
   // Upload to Supabase Storage neural-shorts bucket
   console.log(`[Stage 1: Render] Uploading to neural-shorts storage: ${storagePath}`)
