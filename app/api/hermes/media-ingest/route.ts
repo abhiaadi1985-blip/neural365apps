@@ -18,6 +18,7 @@ interface MediaUpdatePayload {
     }
     podcast_audio_url?: string | null
     short_video_url?: string | null
+    short_storage_url?: string | null
     video_brief?: Record<string, unknown> | null
     status?: 'draft' | 'media_pending' | 'live'
     podcast_kind?: 'article' | 'long'
@@ -26,6 +27,7 @@ interface MediaUpdatePayload {
     render_attempts?: number
     render_last_error?: string | null
     render_last_attempt_at?: string | null
+    publish_last_error?: string | null
   }[]
 }
 
@@ -67,6 +69,9 @@ export async function POST(req: NextRequest) {
     if (item.short_video_url !== undefined) {
       updateData.short_video_url = item.short_video_url
     }
+    if (item.short_storage_url !== undefined) {
+      updateData.short_storage_url = item.short_storage_url
+    }
     if (item.video_brief !== undefined) {
       updateData.video_brief = item.video_brief
     }
@@ -81,6 +86,9 @@ export async function POST(req: NextRequest) {
     }
     if (item.render_last_attempt_at !== undefined) {
       updateData.render_last_attempt_at = item.render_last_attempt_at
+    }
+    if (item.publish_last_error !== undefined) {
+      updateData.publish_last_error = item.publish_last_error
     }
 
     if (item.target === 'blog') {

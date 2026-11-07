@@ -89,7 +89,11 @@ estimated_read_min int
 featured           boolean not null default false
 status             text not null default 'draft' check (status in ('draft', 'media_pending', 'live'))
 podcast_audio_url  text
-short_video_url    text
+short_storage_url  text   -- internal Supabase Storage CDN link (review copy)
+short_video_url    text   -- public YouTube Shorts URL
+podcast_candidate  boolean not null default false
+podcast_approved   boolean not null default false
+publish_last_error text
 video_brief        jsonb
 podcast_kind       text not null default 'article' check (podcast_kind in ('article', 'long'))
 podcast_duration_sec int
@@ -131,28 +135,37 @@ Root `proxy.ts` (Next.js 16 convention, replaces `middleware.ts`) intercepts `/a
 2. Calls `supabase.auth.getUser()` — if no user, redirect to `/admin/login`
 3. Queries `profiles` for `role = 'admin'` — if not admin, sign out and redirect
 
-## Hermes & n8n Pipeline Flow
+## Hermes & Multimedia Pipeline Flow (Migration 010)
 
 ```
-Pulse Flow:
-Microsoft sources / Hermes scrape
-  └─▶ POST /api/hermes/ingest (status='draft', optional podcast/video URLs)
-        └─▶ /admin/review — Human edits/approves text
-              └─▶ status → 'media_pending'
-                    └─▶ Open Notebook / n8n / media worker generates podcast + video
-                          └─▶ POST /api/hermes/media-ingest (attaches URLs)
-                                └─▶ /admin/media — Human approves media
-                                      └─▶ status → 'live' (visible on /pulse)
+Ingestion & Text Review:
+Hermes scrape / generation
+  └─▶ POST /api/hermes/ingest or /api/hermes/blog-ingest
+        (sets status='draft', podcast_candidate=true on complex/hot topics)
+  └─▶ /admin/review or /admin/blog-review
+        ├─▶ Admin edits text & toggles "Approve podcast generation" (podcast_approved=true)
+        └─▶ Admin approves text → status moves to 'media_pending'
 
-Blog Flow:
-Hermes / n8n in-depth scraper & generator
-  └─▶ POST /api/hermes/blog-ingest (status='draft', optional podcast/video URLs)
-        └─▶ /admin/blog-review — Human edits/approves text
-              └─▶ status → 'media_pending'
-                    └─▶ Open Notebook / n8n / video worker generates media
-                          └─▶ POST /api/hermes/media-ingest (attaches URLs)
-                                └─▶ /admin/blog-media — Human approves media
-                                      └─▶ status → 'live' (visible on /blog & pillar pages)
+Media Generation (Two-Stage Watchdog):
+  ├─▶ Podcasts (NotebookLM / Hermes):
+  │     Hermes cron polls: podcast_approved=true AND podcast_audio_url IS NULL
+  │     Generates .mp3, stores in `pulse-podcasts`, calls /api/hermes/media-ingest
+  │
+  └─▶ Shorts (Antigravity local worker):
+        ├─▶ Stage 1 (Render):
+        │     Worker polls: status='media_pending' AND video_brief IS NOT NULL AND short_storage_url IS NULL
+        │     HyperFrames renders MP4 locally, uploads to `neural-shorts` storage
+        │     Calls /api/hermes/media-ingest with short_storage_url
+        │
+        └─▶ Admin Media Review:
+              /admin/media or /admin/blog-media previews video via short_storage_url
+              Admin approves media → status moves to 'live'
+              │
+              └─▶ Stage 2 (Publish to YouTube):
+                    Worker polls: status='live' AND short_storage_url IS NOT NULL AND short_video_url IS NULL
+                    Worker uploads local MP4 to YouTube Shorts using local OAuth credentials
+                    Calls /api/hermes/media-ingest with short_video_url (https://youtube.com/shorts/<id>)
+                    (On failure, writes publish_last_error)
 ```
 
 ## Pillar Pages

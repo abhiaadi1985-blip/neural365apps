@@ -13,7 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '',
     '/pulse',
     '/blog',
-    '/guides',
     '/d365-fo',
     '/dataverse-power-platform',
     '/copilot-ai-agents',

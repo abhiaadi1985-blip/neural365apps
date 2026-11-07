@@ -21,7 +21,10 @@ export interface BlogPost {
   status: 'draft' | 'media_pending' | 'live'
   podcast_audio_url?: string | null
   short_video_url?: string | null
+  short_storage_url?: string | null
   video_brief?: Record<string, unknown> | null
+  podcast_candidate?: boolean
+  podcast_approved?: boolean
   podcast_kind?: 'article' | 'long'
   podcast_duration_sec?: number | null
   podcast_chapters?: PodcastChapter[] | null
@@ -29,6 +32,7 @@ export interface BlogPost {
   render_attempts?: number
   render_last_error?: string | null
   render_last_attempt_at?: string | null
+  publish_last_error?: string | null
   source_url?: string | null
   source_name?: string | null
   dedupe_hash?: string | null
@@ -43,7 +47,10 @@ export interface BlogPost {
   estimatedReadMin?: number | null
   podcastAudioUrl?: string | null
   shortVideoUrl?: string | null
+  shortStorageUrl?: string | null
   videoBrief?: Record<string, unknown> | null
+  podcastCandidate?: boolean
+  podcastApproved?: boolean
   podcastKind?: 'article' | 'long'
   podcastDurationSec?: number | null
   podcastChapters?: PodcastChapter[] | null
@@ -51,6 +58,7 @@ export interface BlogPost {
   renderAttempts?: number
   renderLastError?: string | null
   renderLastAttemptAt?: string | null
+  publishLastError?: string | null
   sourceUrl?: string | null
   sourceName?: string | null
   dedupeHash?: string | null

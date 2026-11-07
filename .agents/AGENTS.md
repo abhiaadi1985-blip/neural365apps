@@ -52,7 +52,10 @@
 - The review pages are split into Server Component (fetches DB) and Client Component (handles editing state + server actions).
 
 ## Multimedia Pipeline Rules
-- **Podcasts (.mp3)**: Stored in Supabase Storage (`pulse-podcasts` bucket). NotebookLM does not offer public embeds; storing `.mp3` enables custom chapter scrubbing via `podcast_chapters`.
-- **Shorts (.mp4 / YouTube)**: Staged in Supabase Storage (`neural-shorts` bucket) for admin review, then published to YouTube Shorts (`short_video_url` points to YouTube URL on live release) to eliminate heavy video egress bills.
-- **Worker Queue**: Local laptop Antigravity worker queries `status = 'media_pending' AND video_brief IS NOT NULL AND short_video_url IS NULL ORDER BY created_at ASC`.
+- **Podcasts (.mp3)**: Stored in Supabase Storage (`pulse-podcasts` bucket). NotebookLM does not offer public embeds; storing `.mp3` enables custom chapter scrubbing via `podcast_chapters`. Admin-gated: Hermes sets `podcast_candidate = true`, admin approves in `/admin/review` or `/admin/blog-review` (`podcast_approved = true`), and Hermes polls `podcast_approved = true AND podcast_audio_url IS NULL`.
+- **Shorts (.mp4 / YouTube)**: Two-stage delivery pipeline:
+  - **Stage 1 (Render)**: Worker queries `status = 'media_pending' AND video_brief IS NOT NULL AND short_storage_url IS NULL`. HyperFrames renders local MP4, uploads to Supabase Storage (`neural-shorts` bucket), and reports `short_storage_url` for internal review on `/admin/media`.
+  - **Stage 2 (Publish)**: Worker queries `status = 'live' AND short_storage_url IS NOT NULL AND short_video_url IS NULL`. Worker uploads local MP4 to YouTube Shorts using local OAuth credentials, then reports `short_video_url` (`https://youtube.com/shorts/<id>`).
+  - Errors logged to `publish_last_error`.
+- **Public Player Rule**: Public pages embed YouTube Shorts or direct MP4s strictly when `short_video_url` is non-null. Public pages must NEVER expose `short_storage_url` to avoid video egress costs.
 - **Hermes Ingestion Endpoints**: `/api/hermes/*` routes use `createAdminClient()` (`SUPABASE_SECRET_KEY`) to safely bypass RLS on server-side agent writes.

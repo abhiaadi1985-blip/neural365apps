@@ -27,6 +27,7 @@ interface BlogIngestPayload {
     podcast_kind?: 'article' | 'long'
     podcast_duration_sec?: number
     podcast_chapters?: { t: number; title: string }[]
+    podcast_candidate?: boolean
     source_url?: string
     source_name?: string
     dedupe_hash?: string

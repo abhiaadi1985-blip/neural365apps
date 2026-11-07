@@ -17,10 +17,14 @@ export interface PulseItem {
   // Media URLs & Worker brief
   podcast_audio_url?: string
   short_video_url?: string
+  short_storage_url?: string | null
   video_brief?: Record<string, unknown> | null
+  podcast_candidate?: boolean
+  podcast_approved?: boolean
   render_attempts?: number
   render_last_error?: string | null
   render_last_attempt_at?: string | null
+  publish_last_error?: string | null
   created_at?: string
 }
 

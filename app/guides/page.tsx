@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import HeroMesh from '@/components/hero-mesh'
 import Link from 'next/link'
 
@@ -39,6 +40,9 @@ const upcomingGuides = [
 ]
 
 export default function GuidesIndexPage() {
+  // Guides section hidden while under development
+  redirect('/')
+
   return (
     <>
       {/* ── Hero ── */}

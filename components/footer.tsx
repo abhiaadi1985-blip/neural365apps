@@ -49,7 +49,6 @@ export default function Footer() {
           ))}
           <Link href="/pulse">Pulse</Link>
           <Link href="/blog">Blog</Link>
-          <Link href="/guides">Guides</Link>
           <a href="/feed.xml" target="_blank" rel="noopener noreferrer">RSS</a>
           {isSignedIn ? (
             <Link href="/account">Account</Link>
@@ -61,4 +60,3 @@ export default function Footer() {
     </footer>
   )
 }
-

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
+import Link from 'next/link'
 import type { PulseItem } from '@/lib/seed-pulse'
 import ReactMarkdown from 'react-markdown'
 import { PulseCard } from '@/components/pulse-grid'
-import { saveDraftContent, approveDraft, seedDatabase } from './actions'
+import { saveDraftContent, approveDraft, togglePodcastApproval } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
 
 export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: PulseItem[] }) {
@@ -117,13 +118,14 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
     })
   }
 
-  const handleSeed = () => {
+  const handlePodcastToggle = (approved: boolean) => {
+    if (!activeId) return
     startTransition(async () => {
       try {
-        await seedDatabase()
-        window.location.reload()
+        await togglePodcastApproval(activeId, approved)
+        setDrafts(prev => prev.map(d => d.id === activeId ? { ...d, podcast_approved: approved } : d))
       } catch (err) {
-        alert('Failed to seed: ' + (err as Error).message)
+        alert('Failed to update podcast approval: ' + (err as Error).message)
       }
     })
   }
@@ -134,11 +136,30 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
         <header style={{ padding: '24px 32px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Text Review Queue</h1>
         </header>
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', gap: 16 }}>
-          <p>Queue is empty. Your Supabase table might not have any drafts.</p>
-          <button className="btn btn-primary" onClick={handleSeed} disabled={isPending}>
-            {isPending ? 'Seeding...' : 'Seed Mock Data to Supabase'}
-          </button>
+        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 32 }}>
+          <div style={{
+            width: 52,
+            height: 52,
+            borderRadius: '50%',
+            background: 'rgba(56, 189, 248, 0.1)',
+            border: '1px solid rgba(56, 189, 248, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.4rem',
+            marginBottom: 16,
+          }}>
+            ✨
+          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+            All caught up!
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: 420, lineHeight: 1.5, marginBottom: 20 }}>
+            There are currently no Pulse drafts pending review. Incoming items ingested by Hermes will appear here automatically.
+          </p>
+          <Link href="/admin" className="btn btn-secondary btn-sm">
+            ← Back to Admin Console
+          </Link>
         </div>
       </div>
     )
@@ -185,8 +206,23 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
               <div style={{ fontWeight: 500, fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
                 {item.title}
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Generated 10 mins ago
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Generated 10 mins ago
+                </div>
+                {item.podcast_candidate && (
+                  <span style={{
+                    fontSize: '0.65rem',
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    background: item.podcast_approved ? 'rgba(34, 197, 94, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                    color: item.podcast_approved ? '#4ade80' : '#c084fc',
+                    border: `1px solid ${item.podcast_approved ? 'rgba(34, 197, 94, 0.3)' : 'rgba(168, 85, 247, 0.3)'}`,
+                  }}>
+                    {item.podcast_approved ? '🎙️ Approved' : '🎙️ Candidate'}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -195,6 +231,42 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
         {/* Preview Pane */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '40px 60px', background: 'var(--bg)' }}>
           <div style={{ maxWidth: 800, margin: '0 auto' }}>
+
+            {/* Admin-Gated Podcast Approval Banner */}
+            {activeItem?.podcast_candidate && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px 18px',
+                background: 'rgba(168, 85, 247, 0.08)',
+                border: '1px solid rgba(168, 85, 247, 0.28)',
+                borderRadius: 'var(--radius)',
+                marginBottom: 32,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: '1.4rem' }}>🎙️</span>
+                  <div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text)' }}>
+                      Podcast Candidate (Hermes Flagged)
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Hermes selected this item for deep-dive audio generation via NotebookLM.
+                    </div>
+                  </div>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!activeItem.podcast_approved}
+                    disabled={isPending}
+                    onChange={(e) => handlePodcastToggle(e.target.checked)}
+                    style={{ cursor: 'pointer', width: 16, height: 16, accentColor: '#a855f7' }}
+                  />
+                  <span>Approve podcast generation</span>
+                </label>
+              </div>
+            )}
             
             <div style={{ marginBottom: 48 }}>
               <h3 style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 16 }}>1. PULSE CARD PREVIEW</h3>

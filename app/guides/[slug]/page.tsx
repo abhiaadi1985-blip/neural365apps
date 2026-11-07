@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import HeroMesh from '@/components/hero-mesh'
 import Link from 'next/link'
 
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
 }
 
 export default async function GuidePage() {
+  // Guides hidden while under development
+  redirect('/')
+
   return (
     <>
       {/* Hero */}

@@ -13,10 +13,12 @@ interface RelatedGuidesProps {
 
 /**
  * RelatedGuides — shows upcoming guides as a teaser section.
- * Guides are currently disabled (feature coming soon).
+ * Hidden on all 4 pillar pages until the guides feature is ready to launch.
  */
 export default function RelatedGuides({ guides, eyebrowLabel = 'Guides' }: RelatedGuidesProps) {
-  if (guides.length === 0) return null
+  // Hidden across all 4 pillars until ready to launch
+  const SHOW_GUIDES = false
+  if (!SHOW_GUIDES || guides.length === 0) return null
 
   return (
     <section className="section">

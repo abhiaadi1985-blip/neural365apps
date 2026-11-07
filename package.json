@@ -13,6 +13,8 @@
     "lint": "eslint",
     "hermes": "npx tsx worker/hermes/run.ts",
     "media-worker": "npx tsx worker/media/generate-podcasts.ts",
+    "shorts-worker": "npx tsx worker/shorts/two-stage-worker.ts --once",
+    "shorts-daemon": "npx tsx worker/shorts/two-stage-worker.ts --daemon",
     "clean-audio": ".venv\\Scripts\\python scripts/1_clean_aroll.py",
     "tts": ".venv\\Scripts\\python scripts/2_local_tts.py",
     "preview-broll": "npx hyperframes preview scenes",

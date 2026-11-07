@@ -23,6 +23,7 @@ interface IngestPayload {
     podcast_audio_url?: string
     short_video_url?:   string
     video_brief?:       Record<string, unknown>
+    podcast_candidate?: boolean
   }[]
 }
 

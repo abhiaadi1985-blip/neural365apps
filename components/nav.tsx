@@ -15,16 +15,41 @@ const pillars = [
 export default function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isSignedIn, setIsSignedIn] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     try {
       const supabase = createClient()
+
+      const checkRole = async (userId: string) => {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single()
+          setIsAdmin(profile?.role === 'admin')
+        } catch {
+          setIsAdmin(false)
+        }
+      }
+
       supabase.auth.getUser().then(({ data: { user } }) => {
         setIsSignedIn(!!user)
+        if (user) {
+          checkRole(user.id)
+        } else {
+          setIsAdmin(false)
+        }
       })
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setIsSignedIn(!!session?.user)
+        if (session?.user) {
+          checkRole(session.user.id)
+        } else {
+          setIsAdmin(false)
+        }
       })
 
       return () => {
@@ -116,27 +141,46 @@ export default function Nav() {
           >
             Blog
           </Link>
-          <Link href="/guides" style={{ transition: 'color 0.15s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-          >
-            Guides
-          </Link>
         </nav>
 
         {/* CTA + Desktop Auth + mobile toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Desktop Auth State */}
-          <div className="desktop-auth">
+          <div className="desktop-auth" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {isSignedIn ? (
-              <Link
-                href="/account"
-                className="btn btn-secondary btn-sm"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}
-              >
-                <span>👤</span>
-                <span>Account</span>
-              </Link>
+              <>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="btn btn-sm"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: '0.78rem',
+                      background: 'rgba(245, 158, 11, 0.12)',
+                      color: '#f59e0b',
+                      border: '1px solid rgba(245, 158, 11, 0.35)',
+                      fontWeight: 600,
+                      fontFamily: '"IBM Plex Mono", monospace',
+                      padding: '5px 10px',
+                      borderRadius: 6,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span>⚡</span>
+                    <span>Admin</span>
+                  </Link>
+                )}
+                <Link
+                  href="/account"
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}
+                >
+                  <span>👤</span>
+                  <span>Account</span>
+                </Link>
+              </>
             ) : (
               <Link
                 href="/sign-in"
@@ -204,7 +248,7 @@ export default function Nav() {
           </Link>
 
           {/* Quick feeds */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 4 }}>
             <Link
               href="/pulse"
               onClick={() => setMobileOpen(false)}
@@ -238,23 +282,6 @@ export default function Nav() {
               }}
             >
               📖 Blog
-            </Link>
-            <Link
-              href="/guides"
-              onClick={() => setMobileOpen(false)}
-              style={{
-                background: 'var(--panel)',
-                border: '1px solid var(--line)',
-                borderRadius: 8,
-                padding: '10px 8px',
-                textAlign: 'center',
-                fontSize: '0.85rem',
-                color: 'var(--text)',
-                textDecoration: 'none',
-                fontWeight: 600,
-              }}
-            >
-              🛠️ Guides
             </Link>
           </div>
 
@@ -296,14 +323,33 @@ export default function Nav() {
           {/* Auth link */}
           <div style={{ borderTop: '1px solid var(--line)', paddingTop: 14 }}>
             {isSignedIn ? (
-              <Link
-                href="/account"
-                onClick={() => setMobileOpen(false)}
-                className="btn btn-secondary"
-                style={{ width: '100%', justifyContent: 'center' }}
-              >
-                👤 Manage Account
-              </Link>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="btn"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      background: 'rgba(245, 158, 11, 0.12)',
+                      color: '#f59e0b',
+                      border: '1px solid rgba(245, 158, 11, 0.35)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    ⚡ Admin Console
+                  </Link>
+                )}
+                <Link
+                  href="/account"
+                  onClick={() => setMobileOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  👤 Manage Account
+                </Link>
+              </div>
             ) : (
               <Link
                 href="/sign-in"

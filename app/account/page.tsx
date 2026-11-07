@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { getUserBookmarks } from '@/lib/comments/actions'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'My Account — neural365 COMMUNITY',
   description: 'Manage your neural365 COMMUNITY account, bookmarks, and subscription.',
@@ -34,6 +36,14 @@ export default async function AccountPage() {
     )
   }
 
+  // Fetch user role from profiles
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = profile?.role === 'admin'
   const bookmarks = await getUserBookmarks()
 
   return (
@@ -43,9 +53,11 @@ export default async function AccountPage() {
 
         {/* Profile Card */}
         <div style={{
-          border: '1px solid var(--line)',
+          border: isAdmin ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid var(--line)',
           borderRadius: 'var(--radius)',
-          background: 'var(--panel)',
+          background: isAdmin
+            ? 'linear-gradient(145deg, rgba(245, 158, 11, 0.05) 0%, var(--panel) 100%)'
+            : 'var(--panel)',
           padding: 28,
           marginBottom: 24,
           display: 'flex',
@@ -58,15 +70,172 @@ export default async function AccountPage() {
             <h2 style={{ fontSize: '0.78rem', marginBottom: 8, color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Practitioner Profile
             </h2>
-            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)' }}>{user.email}</p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--azure)', marginTop: 4, fontFamily: '"IBM Plex Mono", monospace' }}>
-              Community Member
-            </p>
+            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{user.email}</p>
+            <div>
+              {isAdmin ? (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  color: '#f59e0b',
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                  padding: '3px 8px',
+                  borderRadius: 12,
+                  fontFamily: '"IBM Plex Mono", monospace',
+                  letterSpacing: '0.05em',
+                }}>
+                  <span>⚡</span> ADMINISTRATOR
+                </span>
+              ) : (
+                <span style={{
+                  fontSize: '0.8rem',
+                  color: 'var(--azure)',
+                  fontFamily: '"IBM Plex Mono", monospace',
+                }}>
+                  Community Member
+                </span>
+              )}
+            </div>
           </div>
-          <form action="/api/auth/sign-out" method="POST">
-            <button type="submit" className="btn btn-secondary btn-sm">Sign Out</button>
-          </form>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="btn btn-primary btn-sm"
+                style={{
+                  background: '#f59e0b',
+                  borderColor: '#f59e0b',
+                  color: '#040810',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <span>⚡</span> Admin Console &rarr;
+              </Link>
+            )}
+            <form action="/api/auth/sign-out" method="POST">
+              <button type="submit" className="btn btn-secondary btn-sm">Sign Out</button>
+            </form>
+          </div>
         </div>
+
+        {/* Admin Quick Access Panel */}
+        {isAdmin && (
+          <div style={{
+            border: '1px solid rgba(245, 158, 11, 0.25)',
+            borderRadius: 'var(--radius)',
+            background: 'var(--panel)',
+            padding: 24,
+            marginBottom: 24,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+              <div>
+                <span style={{
+                  fontSize: '0.68rem',
+                  color: '#f59e0b',
+                  fontFamily: '"IBM Plex Mono", monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  display: 'block',
+                  marginBottom: 4,
+                }}>
+                  Editorial &amp; Review Pipelines
+                </span>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: 'var(--text)' }}>
+                  Admin Tools
+                </h3>
+              </div>
+              <Link
+                href="/admin"
+                style={{
+                  fontSize: '0.82rem',
+                  color: '#f59e0b',
+                  textDecoration: 'none',
+                  fontFamily: '"IBM Plex Mono", monospace',
+                }}
+              >
+                Full Dashboard &rarr;
+              </Link>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: 10,
+            }}>
+              <Link
+                href="/admin/review"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '12px 14px',
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)' }}>Pulse Text Review</span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>Weekly draft signals &rarr;</span>
+              </Link>
+              <Link
+                href="/admin/media"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '12px 14px',
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)' }}>Pulse Media Review</span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>Podcasts &amp; shorts &rarr;</span>
+              </Link>
+              <Link
+                href="/admin/blog-review"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '12px 14px',
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)' }}>Blog Review</span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>Deep dive drafts &rarr;</span>
+              </Link>
+              <Link
+                href="/admin/blog-media"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '12px 14px',
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text)' }}>Blog Media</span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>Asset pipelines &rarr;</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Saved Bookmarks / Reading List */}
         <div style={{

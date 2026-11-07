@@ -16,6 +16,18 @@ export async function saveDraftContent(id: string, content_md: string, demo_scen
   revalidatePath('/admin/review')
 }
 
+export async function togglePodcastApproval(id: string, approved: boolean) {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  const { error } = await supabase
+    .from('pulse_items')
+    .update({ podcast_approved: approved })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/review')
+}
+
 export async function approveDraft(id: string) {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
+import Link from 'next/link'
 import type { BlogPost } from '@/lib/seed-blog'
 import ReactMarkdown from 'react-markdown'
-import { saveBlogDraft, approveBlogDraft, seedBlogDatabase } from './actions'
+import { saveBlogDraft, approveBlogDraft, toggleBlogPodcastApproval } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
 
 export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts: BlogPost[] }) {
@@ -114,13 +115,16 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
     })
   }
 
-  const handleSeed = () => {
+  const handlePodcastToggle = (approved: boolean) => {
+    if (!activeId) return
     startTransition(async () => {
       try {
-        await seedBlogDatabase()
-        window.location.reload()
+        await toggleBlogPodcastApproval(activeId, approved)
+        setDrafts((prev) =>
+          prev.map((d) => (d.id === activeId ? { ...d, podcast_approved: approved } : d))
+        )
       } catch (err) {
-        alert('Failed to seed: ' + (err as Error).message)
+        alert('Failed to update podcast approval: ' + (err as Error).message)
       }
     })
   }
@@ -146,14 +150,35 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--text-muted)',
-            gap: 16,
+            textAlign: 'center',
+            padding: 32,
           }}
         >
-          <p>Queue is empty. Your Supabase table might not have any drafts.</p>
-          <button className="btn btn-primary" onClick={handleSeed} disabled={isPending}>
-            {isPending ? 'Seeding...' : 'Seed Mock Data to Supabase'}
-          </button>
+          <div
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              background: 'rgba(56, 189, 248, 0.1)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.4rem',
+              marginBottom: 16,
+            }}
+          >
+            ✨
+          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+            All caught up!
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: 420, lineHeight: 1.5, marginBottom: 20 }}>
+            There are currently no blog drafts pending review. New drafts will appear here when submitted.
+          </p>
+          <Link href="/admin" className="btn btn-secondary btn-sm">
+            ← Back to Admin Console
+          </Link>
         </div>
       </div>
     )
@@ -258,15 +283,33 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
               >
                 {item.title}
               </div>
-              <div
-                style={{
-                  fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: '0.72rem',
-                  color: 'var(--text-muted)',
-                  wordBreak: 'break-all',
-                }}
-              >
-                /{item.slug}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <div
+                  style={{
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '0.72rem',
+                    color: 'var(--text-muted)',
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  /{item.slug}
+                </div>
+                {item.podcast_candidate && (
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      fontFamily: '"IBM Plex Mono", monospace',
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: item.podcast_approved ? 'rgba(34, 197, 94, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                      color: item.podcast_approved ? '#4ade80' : '#c084fc',
+                      border: `1px solid ${item.podcast_approved ? 'rgba(34, 197, 94, 0.3)' : 'rgba(168, 85, 247, 0.3)'}`,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {item.podcast_approved ? '🎙️ Approved' : '🎙️ Candidate'}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -275,6 +318,45 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
         {/* Preview Pane (Right Pane) */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '40px 60px', background: 'var(--bg)' }}>
           <div style={{ maxWidth: 800, margin: '0 auto' }}>
+
+            {/* Admin-Gated Podcast Approval Banner */}
+            {activeItem?.podcast_candidate && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  background: 'rgba(168, 85, 247, 0.08)',
+                  border: '1px solid rgba(168, 85, 247, 0.28)',
+                  borderRadius: 'var(--radius)',
+                  marginBottom: 32,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: '1.4rem' }}>🎙️</span>
+                  <div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text)' }}>
+                      Podcast Candidate (Hermes Flagged)
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Hermes selected this article for deep-dive audio generation via NotebookLM.
+                    </div>
+                  </div>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text)' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!activeItem.podcast_approved}
+                    disabled={isPending}
+                    onChange={(e) => handlePodcastToggle(e.target.checked)}
+                    style={{ cursor: 'pointer', width: 16, height: 16, accentColor: '#a855f7' }}
+                  />
+                  <span>Approve podcast generation</span>
+                </label>
+              </div>
+            )}
+
             {/* Section 1: Post Metadata */}
             <div
               style={{

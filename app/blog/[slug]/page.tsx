@@ -26,6 +26,18 @@ const laneColors: Record<string, string> = {
 
 export const dynamic = 'force-dynamic'
 
+function getYouTubeEmbedUrl(url?: string | null): string | null {
+  if (!url) return null
+  const trimmed = url.trim()
+  const shortsMatch = trimmed.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/)
+  if (shortsMatch && shortsMatch[1]) return `https://www.youtube.com/embed/${shortsMatch[1]}`
+  const watchMatch = trimmed.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/)
+  if (watchMatch && watchMatch[1]) return `https://www.youtube.com/embed/${watchMatch[1]}`
+  const shortlinkMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]+)/)
+  if (shortlinkMatch && shortlinkMatch[1]) return `https://www.youtube.com/embed/${shortlinkMatch[1]}`
+  return null
+}
+
 function formatDisplayDate(dateStr: string): string {
   if (!dateStr) return ''
   if (!/^\d{4}/.test(dateStr)) return dateStr
@@ -288,24 +300,48 @@ export default async function BlogDetailPage({
             )}
 
             {/* Video Player */}
-            {videoUrl && (
-              <div style={{
-                background: 'var(--panel)',
-                border: '1px solid var(--line)',
-                borderRadius: 'var(--radius)',
-                padding: '20px 24px',
-                marginBottom: 32,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--lane-new)', marginBottom: 12 }}>
-                  <span>🎬</span>
-                  <span style={{ fontWeight: 600 }}>NEURAL SHORT (VISUAL EXPLAINER &amp; BREAKDOWN)</span>
+            {videoUrl && (() => {
+              const ytEmbed = getYouTubeEmbedUrl(videoUrl)
+              return (
+                <div style={{
+                  background: 'var(--panel)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--radius)',
+                  padding: '20px 24px',
+                  marginBottom: 32,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--lane-new)', marginBottom: 12 }}>
+                    <span>🎬</span>
+                    <span style={{ fontWeight: 600 }}>NEURAL SHORT (VISUAL EXPLAINER &amp; BREAKDOWN)</span>
+                  </div>
+                  {ytEmbed ? (
+                    <div style={{
+                      position: 'relative',
+                      width: '100%',
+                      maxWidth: 400,
+                      aspectRatio: '9 / 16',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      background: '#000',
+                      margin: '0 auto',
+                    }}>
+                      <iframe
+                        src={ytEmbed}
+                        title={post.title}
+                        style={{ border: 0, width: '100%', height: '100%' }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <video controls style={{ width: '100%', maxHeight: 420, borderRadius: 8, background: '#000' }} key={videoUrl}>
+                      <source src={videoUrl} type="video/mp4" />
+                      Your browser does not support video playback.
+                    </video>
+                  )}
                 </div>
-                <video controls style={{ width: '100%', maxHeight: 420, borderRadius: 8, background: '#000' }} key={videoUrl}>
-                  <source src={videoUrl} type="video/mp4" />
-                  Your browser does not support video playback.
-                </video>
-              </div>
-            )}
+              )
+            })()}
 
             {/* Full body_md rendered with ReactMarkdown */}
             <div

@@ -91,8 +91,8 @@ export default function ClientBlogMediaQueue({ initialItems }: { initialItems: B
 
     startTransition(async () => {
       try {
-        await updateBlogMediaUrls(activeId, undefined, result.url)
-        setItems(prev => prev.map(item => item.id === activeId ? { ...item, short_video_url: result.url } : item))
+        await updateBlogMediaUrls(activeId, undefined, undefined, result.url)
+        setItems(prev => prev.map(item => item.id === activeId ? { ...item, short_storage_url: result.url } : item))
       } catch (err) {
         alert('Failed to save video URL: ' + (err as Error).message)
       }
@@ -175,7 +175,7 @@ export default function ClientBlogMediaQueue({ initialItems }: { initialItems: B
               <div style={{ display: 'flex', gap: 8, fontSize: '0.75rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--text-muted)', alignItems: 'center', flexWrap: 'wrap' }}>
                 <span>{item.podcast_audio_url ? (item.podcast_kind === 'long' ? '🎧 Long Ep' : '🎙️ Audio') : '⏳ No audio'}</span>
                 <span>•</span>
-                <span>{item.short_video_url ? '🎬 Video' : '⏳ No video'}</span>
+                <span>{item.short_storage_url || item.short_video_url ? '🎬 Video' : '⏳ No video'}</span>
                 {item.podcast_kind === 'long' && (
                   <span style={{ color: 'var(--azure)', background: 'var(--azure-dim)', padding: '1px 5px', borderRadius: 3, fontSize: '0.65rem' }}>
                     Deep Dive
@@ -290,7 +290,7 @@ export default function ClientBlogMediaQueue({ initialItems }: { initialItems: B
             <div style={{ marginBottom: 40, background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', padding: '28px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.8rem', color: 'var(--lane-new)', fontWeight: 600 }}>
-                  🎬 NEURAL SHORT VIDEO ({activeItem?.short_video_url ? 'ATTACHED' : 'PENDING'})
+                  🎬 NEURAL SHORT VIDEO ({activeItem?.short_storage_url || activeItem?.short_video_url ? 'ATTACHED' : 'PENDING'})
                 </h3>
                 <label style={{
                   fontSize: '0.75rem',
@@ -320,15 +320,26 @@ export default function ClientBlogMediaQueue({ initialItems }: { initialItems: B
                 </label>
               </div>
 
-              {activeItem?.short_video_url ? (
+              {activeItem?.short_storage_url || activeItem?.short_video_url ? (
                 <div>
-                  <video controls style={{ width: '100%', maxHeight: 400, borderRadius: 8, marginBottom: 12, background: '#000' }} key={activeItem.short_video_url}>
-                    <source src={activeItem.short_video_url} type="video/mp4" />
+                  <video
+                    controls
+                    style={{ width: '100%', maxHeight: 400, borderRadius: 8, marginBottom: 12, background: '#000' }}
+                    key={activeItem.short_storage_url || activeItem.short_video_url}
+                  >
+                    <source src={(activeItem.short_storage_url || activeItem.short_video_url) ?? undefined} type="video/mp4" />
                     Your browser does not support video playback.
                   </video>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace', wordBreak: 'break-all' }}>
-                    CDN: {activeItem.short_video_url}
-                  </p>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {activeItem.short_storage_url && (
+                      <p style={{ wordBreak: 'break-all' }}>
+                        📦 Review Copy (Storage): {activeItem.short_storage_url}
+                      </p>
+                    )}
+                    <p style={{ wordBreak: 'break-all', color: activeItem.short_video_url ? '#34d8b0' : 'var(--text-muted)' }}>
+                      ▶️ Public YouTube: {activeItem.short_video_url || 'Pending Stage 2 publish'}
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div style={{
