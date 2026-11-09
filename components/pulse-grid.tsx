@@ -6,7 +6,8 @@ import type { PulseItem } from '@/lib/seed-pulse'
 
 // ── PulseCard ──────────────────────────────────────────────
 export function PulseCard({ item }: { item: PulseItem }) {
-  const relativeTime = formatRelative(item.publishedAt)
+  const rawDate = item.published_at || item.publishedAt || ''
+  const relativeTime = formatRelative(rawDate)
   const pillarShort  = pillarShortLabel(item.pillar)
 
   return (
@@ -69,7 +70,8 @@ export function PulseGrid({
 }
 
 // ── Helpers ────────────────────────────────────────────────
-function formatRelative(iso: string): string {
+function formatRelative(iso?: string | null): string {
+  if (!iso) return ''
   // If already a label (e.g. "2d ago", "roadmap") pass through
   if (!/^\d{4}/.test(iso)) return iso
   const diff = Date.now() - new Date(iso).getTime()

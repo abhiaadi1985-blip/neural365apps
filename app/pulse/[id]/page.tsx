@@ -25,6 +25,19 @@ function getYouTubeEmbedUrl(url?: string | null): string | null {
   return null
 }
 
+function formatPulseDate(dateStr?: string | null): string {
+  if (!dateStr) return ''
+  if (dateStr === 'roadmap') return '📅 On the roadmap'
+  if (!/^\d{4}/.test(dateStr)) return dateStr
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
 const pillarMeta: Record<string, { label: string; href: string }> = {
   'd365-fo':                  { label: 'D365 ERP',                  href: '/d365-fo' },
   'dataverse-power-platform': { label: 'Dataverse & Power Platform', href: '/dataverse-power-platform' },
@@ -78,6 +91,11 @@ export default async function PulseDetailPage({
   }
 
   if (!item) notFound()
+
+  const rawDate = item.published_at || item.publishedAt
+  const dateFormatted = formatPulseDate(rawDate)
+  const sourceName = item.source_name || item.sourceName || 'Microsoft'
+  const sourceUrl = item.source_url || item.sourceUrl
 
   const pillar   = pillarMeta[item.pillar]
   const laneColor = laneColors[item.lane as string] ?? 'var(--azure)'
@@ -153,13 +171,29 @@ export default async function PulseDetailPage({
           </h1>
 
           <div style={{ marginTop: 14, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace' }}>
-              {item.publishedAt === 'roadmap' ? '📅 On the roadmap' : `🕐 ${item.publishedAt}`}
-            </span>
-            <span style={{ color: 'var(--line)' }}>·</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace' }}>
-              Source: {item.sourceName}
-            </span>
+            {dateFormatted && (
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace' }}>
+                {dateFormatted.startsWith('📅') ? dateFormatted : `🕐 ${dateFormatted}`}
+              </span>
+            )}
+            {dateFormatted && sourceName && <span style={{ color: 'var(--line)' }}>·</span>}
+            {sourceName && (
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace' }}>
+                Source:{' '}
+                {sourceUrl && sourceUrl !== '#' ? (
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    style={{ color: 'var(--azure)', textDecoration: 'none' }}
+                  >
+                    {sourceName} ↗
+                  </a>
+                ) : (
+                  sourceName
+                )}
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -266,33 +300,19 @@ export default async function PulseDetailPage({
               </div>
             )}
 
-            {/* What this means section */}
-            <div style={{
-              background: `color-mix(in srgb, ${laneColor} 5%, var(--panel))`,
-              border: `1px solid color-mix(in srgb, ${laneColor} 20%, var(--line))`,
-              borderRadius: 'var(--radius)', padding: '24px 28px', marginBottom: 32,
-            }}>
-              <div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.7rem', color: laneColor, letterSpacing: '0.08em', marginBottom: 10 }}>
-                STRATEGIC IMPACT
-              </div>
-              <p style={{ fontSize: '0.95rem', lineHeight: 1.7, color: 'var(--text-muted)', margin: 0 }}>
-                {item.lane === 'new' && 'This capability is generally available now. You can begin evaluating it in your environment today.'}
-                {item.lane === 'coming' && 'This is on the Microsoft roadmap. Start planning your adoption strategy — check the source for estimated release timelines.'}
-                {item.lane === 'architecture' && 'This is an infrastructure or platform change that may affect your existing configurations. Review the source documentation before your next environment update.'}
-              </p>
-            </div>
-
             {/* Source CTA */}
-            {item.sourceUrl && item.sourceUrl !== '#' && (
-              <a
-                href={item.sourceUrl}
-                target="_blank"
-                rel="nofollow noopener noreferrer"
-                className="btn btn-primary"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
-              >
-                Read official documentation ↗
-              </a>
+            {sourceUrl && sourceUrl !== '#' && (
+              <div style={{ marginBottom: 32 }}>
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  className="btn btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
+                >
+                  Read official documentation ↗
+                </a>
+              </div>
             )}
 
             {/* Community Discussion */}

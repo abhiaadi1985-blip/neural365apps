@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type { PulseItem } from '@/lib/seed-pulse'
 import ReactMarkdown from 'react-markdown'
 import { PulseCard } from '@/components/pulse-grid'
-import { saveDraftContent, approveDraft, togglePodcastApproval } from './actions'
+import { saveDraftContent, approveDraft, publishLiveDirectly, togglePodcastApproval } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
 
 export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: PulseItem[] }) {
@@ -104,7 +104,22 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
     })
   }
 
-  const handleApprove = () => {
+  const handlePublishLive = () => {
+    if (!activeId) return
+    startTransition(async () => {
+      try {
+        await publishLiveDirectly(activeId)
+        const nextDrafts = drafts.filter(d => d.id !== activeId)
+        setDrafts(nextDrafts)
+        setActiveId(nextDrafts[0]?.id)
+      } catch (err) {
+        alert('Failed to publish live: ' + (err as Error).message)
+      }
+    })
+  }
+
+  const handleSendToMedia = () => {
+    if (!activeId) return
     startTransition(async () => {
       try {
         await approveDraft(activeId)
@@ -113,7 +128,7 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
         setDrafts(nextDrafts)
         setActiveId(nextDrafts[0]?.id)
       } catch (err) {
-        alert('Failed to approve: ' + (err as Error).message)
+        alert('Failed to send to media queue: ' + (err as Error).message)
       }
     })
   }
@@ -179,10 +194,30 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
             </>
           ) : (
             <>
-              <button className="btn" onClick={() => setIsEditing(true)} style={{ background: 'var(--panel)', border: '1px solid var(--line)', color: 'var(--text)' }} disabled={isPending}>Edit Text</button>
-              <button className="btn" style={{ background: 'var(--panel)', border: '1px solid var(--line)', color: 'var(--text)' }} disabled={isPending}>Reject</button>
-              <button className="btn btn-primary" onClick={handleApprove} disabled={isPending}>
-                {isPending ? 'Processing...' : 'Approve & Send to NotebookLM'}
+              <button
+                className="btn"
+                onClick={() => setIsEditing(true)}
+                style={{ background: 'var(--panel)', border: '1px solid var(--line)', color: 'var(--text)' }}
+                disabled={isPending}
+              >
+                Edit Text
+              </button>
+              <button
+                className="btn"
+                onClick={handleSendToMedia}
+                style={{ background: 'var(--panel)', border: '1px solid var(--line)', color: 'var(--text)' }}
+                disabled={isPending}
+                title="Send to Media Review queue to generate or review podcasts/shorts"
+              >
+                Send to Media Queue
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handlePublishLive}
+                disabled={isPending}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                {isPending ? 'Publishing...' : '🚀 Publish Live'}
               </button>
             </>
           )}

@@ -42,6 +42,21 @@ export async function approveBlogDraft(id: string) {
   revalidatePath('/blog')
 }
 
+export async function publishBlogLiveDirectly(id: string) {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  const { error } = await supabase
+    .from('blog_posts')
+    .update({ status: 'live' })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/blog-review')
+  revalidatePath('/admin/blog-media')
+  revalidatePath('/blog')
+  revalidatePath('/')
+}
+
 export async function seedBlogDatabase() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)

@@ -6,9 +6,12 @@ export interface PulseItem {
   summary: string
   lane: Lane
   pillar: Pillar
-  sourceUrl: string
-  sourceName: string
-  publishedAt: string
+  sourceUrl?: string
+  sourceName?: string
+  publishedAt?: string
+  source_url?: string | null
+  source_name?: string | null
+  published_at?: string | null
   
   // New fields for the Hermes long-form blog pipeline
   content_md?: string

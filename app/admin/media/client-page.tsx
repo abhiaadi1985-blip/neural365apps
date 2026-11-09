@@ -119,10 +119,10 @@ export default function ClientMediaQueue({ initialItems }: { initialItems: Pulse
             maxWidth: 480,
             width: '100%',
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: 16 }}>🎧</div>
+            <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>🎬 🎙️</div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--text)', marginBottom: 8, fontWeight: 600 }}>Queue is empty</h3>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5 }}>
-              No media artifacts currently pending review. Items approved in the Text Review queue will appear here once audio &amp; video assets are generated.
+              No items currently pending media review. Only items sent to the media queue from Text Review (to attach or generate podcasts and video shorts) will appear here.
             </p>
           </div>
         </div>

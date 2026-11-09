@@ -4,7 +4,7 @@ import { useState, useTransition, useRef } from 'react'
 import Link from 'next/link'
 import type { BlogPost } from '@/lib/seed-blog'
 import ReactMarkdown from 'react-markdown'
-import { saveBlogDraft, approveBlogDraft, toggleBlogPodcastApproval } from './actions'
+import { saveBlogDraft, approveBlogDraft, publishBlogLiveDirectly, toggleBlogPodcastApproval } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
 
 export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts: BlogPost[] }) {
@@ -96,7 +96,25 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
     })
   }
 
-  const handleApprove = () => {
+  const handlePublishLive = () => {
+    if (!activeId) return
+    startTransition(async () => {
+      try {
+        await publishBlogLiveDirectly(activeId)
+        const nextDrafts = drafts.filter((d) => d.id !== activeId)
+        setDrafts(nextDrafts)
+        setActiveId(nextDrafts[0]?.id)
+        if (nextDrafts[0]) {
+          setEditedBody(nextDrafts[0].body_md || '')
+          setEditedSubtitle(nextDrafts[0].subtitle || '')
+        }
+      } catch (err) {
+        alert('Failed to publish live: ' + (err as Error).message)
+      }
+    })
+  }
+
+  const handleSendToMedia = () => {
     if (!activeId) return
     startTransition(async () => {
       try {
@@ -110,7 +128,7 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
           setEditedSubtitle(nextDrafts[0].subtitle || '')
         }
       } catch (err) {
-        alert('Failed to approve: ' + (err as Error).message)
+        alert('Failed to send to media queue: ' + (err as Error).message)
       }
     })
   }
@@ -223,13 +241,20 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
               </button>
               <button
                 className="btn"
+                onClick={handleSendToMedia}
                 style={{ background: 'var(--panel)', border: '1px solid var(--line)', color: 'var(--text)' }}
                 disabled={isPending}
+                title="Send to Media Review queue to generate or review podcasts/shorts"
               >
-                Reject
+                Send to Media Queue
               </button>
-              <button className="btn btn-primary" onClick={handleApprove} disabled={isPending}>
-                {isPending ? 'Processing...' : 'Approve & Send to NotebookLM'}
+              <button
+                className="btn btn-primary"
+                onClick={handlePublishLive}
+                disabled={isPending}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                {isPending ? 'Publishing...' : '🚀 Publish Live'}
               </button>
             </>
           )}

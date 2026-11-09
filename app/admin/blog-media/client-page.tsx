@@ -117,10 +117,10 @@ export default function ClientBlogMediaQueue({ initialItems }: { initialItems: B
             maxWidth: 480,
             width: '100%',
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: 16 }}>🎬</div>
+            <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>🎬 🎙️</div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--text)', marginBottom: 8, fontWeight: 600 }}>Queue is empty</h3>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5 }}>
-              No blog articles currently pending media review. Posts approved in Blog Text Review will appear here once audio &amp; video assets are generated.
+              No articles currently pending media review. Only articles sent to the media queue from Blog Review (to attach or generate podcasts and video shorts) will appear here.
             </p>
           </div>
         </div>
