@@ -28,6 +28,9 @@ export interface PulseItem {
   render_last_error?: string | null
   render_last_attempt_at?: string | null
   publish_last_error?: string | null
+  status?: 'draft' | 'media_pending' | 'live' | 'revision_requested' | 'rejected'
+  review_feedback?: string | null
+  reviewed_at?: string | null
   created_at?: string
 }
 

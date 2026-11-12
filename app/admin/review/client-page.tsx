@@ -6,7 +6,8 @@ import type { PulseItem } from '@/lib/seed-pulse'
 import type { Pillar } from '@/lib/design-tokens'
 import ReactMarkdown from 'react-markdown'
 import { PulseCard } from '@/components/pulse-grid'
-import { saveDraftContent, approveDraft, publishLiveDirectly, togglePodcastApproval, updatePulsePillar } from './actions'
+import { AdminFeedbackModal } from '@/components/admin-feedback-modal'
+import { saveDraftContent, approveDraft, publishLiveDirectly, submitPulseFeedback, togglePodcastApproval, updatePulsePillar } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
 
 const PILLAR_OPTIONS: { value: Pillar; label: string }[] = [
@@ -24,6 +25,7 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
   
   const [activeId, setActiveId] = useState(drafts[0]?.id)
   const [isEditing, setIsEditing] = useState(false)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
   
   const activeItem = drafts.find(d => d.id === activeId) || drafts[0]
 
@@ -112,14 +114,23 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
     })
   }
 
+  const advanceQueue = (removedId: string) => {
+    const nextDrafts = drafts.filter(d => d.id !== removedId)
+    const nextItem = nextDrafts[0]
+    setDrafts(nextDrafts)
+    setActiveId(nextItem?.id)
+    setIsEditing(false)
+    setEditedContent(nextItem?.content_md || '')
+    setEditedDemo(nextItem?.demo_scenario_md || '')
+    window.dispatchEvent(new Event('admin-counts-updated'))
+  }
+
   const handlePublishLive = () => {
     if (!activeId) return
     startTransition(async () => {
       try {
         await publishLiveDirectly(activeId)
-        const nextDrafts = drafts.filter(d => d.id !== activeId)
-        setDrafts(nextDrafts)
-        setActiveId(nextDrafts[0]?.id)
+        advanceQueue(activeId)
       } catch (err) {
         alert('Failed to publish live: ' + (err as Error).message)
       }
@@ -131,12 +142,22 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
     startTransition(async () => {
       try {
         await approveDraft(activeId)
-        // Remove from local drafts queue
-        const nextDrafts = drafts.filter(d => d.id !== activeId)
-        setDrafts(nextDrafts)
-        setActiveId(nextDrafts[0]?.id)
+        advanceQueue(activeId)
       } catch (err) {
         alert('Failed to send to media queue: ' + (err as Error).message)
+      }
+    })
+  }
+
+  const handleFeedbackSubmit = (status: 'revision_requested' | 'rejected', feedback: string) => {
+    if (!activeId) return
+    startTransition(async () => {
+      try {
+        await submitPulseFeedback(activeId, status, feedback)
+        setIsFeedbackOpen(false)
+        advanceQueue(activeId)
+      } catch (err) {
+        alert('Failed to submit feedback: ' + (err as Error).message)
       }
     })
   }
@@ -224,6 +245,15 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
                 disabled={isPending}
               >
                 Edit Text
+              </button>
+              <button
+                className="btn"
+                onClick={() => setIsFeedbackOpen(true)}
+                style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5' }}
+                disabled={isPending}
+                title="Reject this draft or send revision feedback to Hermes"
+              >
+                Reject / Feedback
               </button>
               <button
                 className="btn"
@@ -497,6 +527,14 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
           </div>
         </div>
       </div>
+
+      <AdminFeedbackModal
+        isOpen={isFeedbackOpen}
+        itemTitle={activeItem?.title || ''}
+        isPending={isPending}
+        onClose={() => setIsFeedbackOpen(false)}
+        onSubmit={handleFeedbackSubmit}
+      />
     </div>
   )
 }

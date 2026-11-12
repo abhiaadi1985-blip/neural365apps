@@ -11,15 +11,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mediaCount, setMediaCount] = useState<number>(0)
   const [blogDraftCount, setBlogDraftCount] = useState<number>(0)
   const [blogMediaCount, setBlogMediaCount] = useState<number>(0)
+  const [feedbackCount, setFeedbackCount] = useState<number>(0)
 
   const fetchCounts = useCallback(async () => {
     try {
       const supabase = createClient()
-      const [draftRes, mediaRes, blogDraftRes, blogMediaRes] = await Promise.all([
+      const [draftRes, mediaRes, blogDraftRes, blogMediaRes, pulseFeedbackRes, blogFeedbackRes] = await Promise.all([
         supabase.from('pulse_items').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
         supabase.from('pulse_items').select('id', { count: 'exact', head: true }).eq('status', 'media_pending'),
         supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
         supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'media_pending'),
+        supabase.from('pulse_items').select('id', { count: 'exact', head: true }).eq('status', 'revision_requested'),
+        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'revision_requested'),
       ])
       if (typeof draftRes.count === 'number') {
         setDraftCount(draftRes.count)
@@ -33,6 +36,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (typeof blogMediaRes.count === 'number') {
         setBlogMediaCount(blogMediaRes.count)
       }
+      const totalFeedback = (pulseFeedbackRes.count ?? 0) + (blogFeedbackRes.count ?? 0)
+      setFeedbackCount(totalFeedback)
     } catch {
       // Ignore count fetch errors
     }
@@ -40,6 +45,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     fetchCounts()
+    const handleCountsUpdated = () => {
+      fetchCounts()
+    }
+    window.addEventListener('admin-counts-updated', handleCountsUpdated)
+    return () => {
+      window.removeEventListener('admin-counts-updated', handleCountsUpdated)
+    }
   }, [fetchCounts, pathname])
 
   // Login page gets a clean, full-screen view without sidebar
@@ -65,6 +77,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, color: 'var(--text)', textDecoration: 'none', background: pathname === '/admin' ? 'var(--panel)' : 'transparent', border: pathname === '/admin' ? '1px solid var(--line)' : '1px solid transparent' }}>
             <span style={{ fontSize: '0.9rem' }}>📊</span>
             <span>Dashboard</span>
+          </Link>
+          <Link href="/admin/feedback" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 8, color: 'var(--text)', textDecoration: 'none', background: pathname.startsWith('/admin/feedback') ? 'var(--panel)' : 'transparent', border: pathname.startsWith('/admin/feedback') ? '1px solid var(--line)' : '1px solid transparent' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '0.9rem' }}>📝</span>
+              <span>Feedback Queue</span>
+            </span>
+            <span style={{
+              background: feedbackCount > 0 ? 'rgba(245, 158, 11, 0.16)' : 'var(--line)',
+              color: feedbackCount > 0 ? '#fcd34d' : 'var(--text-muted)',
+              padding: '2px 6px',
+              borderRadius: 4,
+              fontSize: '0.75rem',
+              fontFamily: '"IBM Plex Mono", monospace'
+            }}>{feedbackCount}</span>
           </Link>
         </nav>
 

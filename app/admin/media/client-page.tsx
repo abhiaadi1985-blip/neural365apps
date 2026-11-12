@@ -23,6 +23,7 @@ export default function ClientMediaQueue({ initialItems }: { initialItems: Pulse
         const nextItems = items.filter(d => d.id !== activeId)
         setItems(nextItems)
         setActiveId(nextItems[0]?.id)
+        window.dispatchEvent(new Event('admin-counts-updated'))
       } catch (err) {
         alert('Failed to approve: ' + (err as Error).message)
       }
@@ -37,6 +38,7 @@ export default function ClientMediaQueue({ initialItems }: { initialItems: Pulse
         const nextItems = items.filter(d => d.id !== activeId)
         setItems(nextItems)
         setActiveId(nextItems[0]?.id)
+        window.dispatchEvent(new Event('admin-counts-updated'))
       } catch (err) {
         alert('Failed to reject: ' + (err as Error).message)
       }

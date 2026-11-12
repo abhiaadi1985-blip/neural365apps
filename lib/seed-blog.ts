@@ -18,7 +18,9 @@ export interface BlogPost {
   hero_image_url?: string | null
   estimated_read_min?: number | null
   featured: boolean
-  status: 'draft' | 'media_pending' | 'live'
+  status: 'draft' | 'media_pending' | 'live' | 'revision_requested' | 'rejected'
+  review_feedback?: string | null
+  reviewed_at?: string | null
   podcast_audio_url?: string | null
   short_video_url?: string | null
   short_storage_url?: string | null

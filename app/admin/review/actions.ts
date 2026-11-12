@@ -85,6 +85,27 @@ export async function publishLiveDirectly(id: string) {
   revalidatePath('/')
 }
 
+export async function submitPulseFeedback(
+  id: string,
+  status: 'revision_requested' | 'rejected',
+  feedback: string
+) {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  const { error } = await supabase
+    .from('pulse_items')
+    .update({
+      status,
+      review_feedback: feedback.trim() || null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/review')
+  revalidatePath('/admin/feedback')
+}
+
 export async function seedDatabase() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)

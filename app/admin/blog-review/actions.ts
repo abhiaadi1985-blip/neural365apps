@@ -57,6 +57,27 @@ export async function publishBlogLiveDirectly(id: string) {
   revalidatePath('/')
 }
 
+export async function submitBlogFeedback(
+  id: string,
+  status: 'revision_requested' | 'rejected',
+  feedback: string
+) {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  const { error } = await supabase
+    .from('blog_posts')
+    .update({
+      status,
+      review_feedback: feedback.trim() || null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/blog-review')
+  revalidatePath('/admin/feedback')
+}
+
 export async function seedBlogDatabase() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)

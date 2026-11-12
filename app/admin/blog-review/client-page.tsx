@@ -4,7 +4,8 @@ import { useState, useTransition, useRef } from 'react'
 import Link from 'next/link'
 import type { BlogPost } from '@/lib/seed-blog'
 import ReactMarkdown from 'react-markdown'
-import { saveBlogDraft, approveBlogDraft, publishBlogLiveDirectly, toggleBlogPodcastApproval } from './actions'
+import { AdminFeedbackModal } from '@/components/admin-feedback-modal'
+import { saveBlogDraft, approveBlogDraft, publishBlogLiveDirectly, submitBlogFeedback, toggleBlogPodcastApproval } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
 
 export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts: BlogPost[] }) {
@@ -14,6 +15,7 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
 
   const [activeId, setActiveId] = useState(drafts[0]?.id)
   const [isEditing, setIsEditing] = useState(false)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
 
   const activeItem = drafts.find((d) => d.id === activeId) || drafts[0]
 
@@ -96,18 +98,23 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
     })
   }
 
+  const advanceQueue = (removedId: string) => {
+    const nextDrafts = drafts.filter((d) => d.id !== removedId)
+    const nextItem = nextDrafts[0]
+    setDrafts(nextDrafts)
+    setActiveId(nextItem?.id)
+    setIsEditing(false)
+    setEditedBody(nextItem?.body_md || '')
+    setEditedSubtitle(nextItem?.subtitle || '')
+    window.dispatchEvent(new Event('admin-counts-updated'))
+  }
+
   const handlePublishLive = () => {
     if (!activeId) return
     startTransition(async () => {
       try {
         await publishBlogLiveDirectly(activeId)
-        const nextDrafts = drafts.filter((d) => d.id !== activeId)
-        setDrafts(nextDrafts)
-        setActiveId(nextDrafts[0]?.id)
-        if (nextDrafts[0]) {
-          setEditedBody(nextDrafts[0].body_md || '')
-          setEditedSubtitle(nextDrafts[0].subtitle || '')
-        }
+        advanceQueue(activeId)
       } catch (err) {
         alert('Failed to publish live: ' + (err as Error).message)
       }
@@ -119,16 +126,22 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
     startTransition(async () => {
       try {
         await approveBlogDraft(activeId)
-        // Remove from local drafts queue
-        const nextDrafts = drafts.filter((d) => d.id !== activeId)
-        setDrafts(nextDrafts)
-        setActiveId(nextDrafts[0]?.id)
-        if (nextDrafts[0]) {
-          setEditedBody(nextDrafts[0].body_md || '')
-          setEditedSubtitle(nextDrafts[0].subtitle || '')
-        }
+        advanceQueue(activeId)
       } catch (err) {
         alert('Failed to send to media queue: ' + (err as Error).message)
+      }
+    })
+  }
+
+  const handleFeedbackSubmit = (status: 'revision_requested' | 'rejected', feedback: string) => {
+    if (!activeId) return
+    startTransition(async () => {
+      try {
+        await submitBlogFeedback(activeId, status, feedback)
+        setIsFeedbackOpen(false)
+        advanceQueue(activeId)
+      } catch (err) {
+        alert('Failed to submit feedback: ' + (err as Error).message)
       }
     })
   }
@@ -238,6 +251,15 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
                 disabled={isPending}
               >
                 Edit Text
+              </button>
+              <button
+                className="btn"
+                onClick={() => setIsFeedbackOpen(true)}
+                style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5' }}
+                disabled={isPending}
+                title="Reject this draft or send revision feedback to Hermes"
+              >
+                Reject / Feedback
               </button>
               <button
                 className="btn"
@@ -640,6 +662,14 @@ export default function ClientBlogReviewQueue({ initialDrafts }: { initialDrafts
           </div>
         </div>
       </div>
+
+      <AdminFeedbackModal
+        isOpen={isFeedbackOpen}
+        itemTitle={activeItem?.title || ''}
+        isPending={isPending}
+        onClose={() => setIsFeedbackOpen(false)}
+        onSubmit={handleFeedbackSubmit}
+      />
     </div>
   )
 }
