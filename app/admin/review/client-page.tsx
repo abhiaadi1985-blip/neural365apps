@@ -3,10 +3,18 @@
 import { useState, useTransition, useRef } from 'react'
 import Link from 'next/link'
 import type { PulseItem } from '@/lib/seed-pulse'
+import type { Pillar } from '@/lib/design-tokens'
 import ReactMarkdown from 'react-markdown'
 import { PulseCard } from '@/components/pulse-grid'
-import { saveDraftContent, approveDraft, publishLiveDirectly, togglePodcastApproval } from './actions'
+import { saveDraftContent, approveDraft, publishLiveDirectly, togglePodcastApproval, updatePulsePillar } from './actions'
 import { buildStoragePath, uploadToStorage } from '@/lib/supabase/storage'
+
+const PILLAR_OPTIONS: { value: Pillar; label: string }[] = [
+  { value: 'd365-fo', label: 'D365 ERP' },
+  { value: 'dataverse-power-platform', label: 'Dataverse & Power Platform' },
+  { value: 'copilot-ai-agents', label: 'Copilot & AI Agents' },
+  { value: 'industry-solutions', label: 'Industry Solutions' },
+]
 
 export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: PulseItem[] }) {
   // We use state here so edits persist while clicking around the mock UI
@@ -145,6 +153,21 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
     })
   }
 
+  const handlePillarChange = (id: string, newPillar: Pillar) => {
+    const previousPillar = drafts.find(d => d.id === id)?.pillar
+    setDrafts(prev => prev.map(d => d.id === id ? { ...d, pillar: newPillar } : d))
+    startTransition(async () => {
+      try {
+        await updatePulsePillar(id, newPillar)
+      } catch (err) {
+        if (previousPillar) {
+          setDrafts(prev => prev.map(d => d.id === id ? { ...d, pillar: previousPillar } : d))
+        }
+        alert('Failed to update pillar: ' + (err as Error).message)
+      }
+    })
+  }
+
   if (drafts.length === 0) {
     return (
       <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
@@ -235,8 +258,30 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
               borderLeft: activeId === item.id ? '3px solid var(--azure)' : '3px solid transparent',
               cursor: 'pointer'
             }}>
-              <div style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.65rem', color: 'var(--azure)', marginBottom: 6 }}>
-                {item.pillar.toUpperCase()}
+              <div style={{ marginBottom: 8 }} onClick={(e) => e.stopPropagation()}>
+                <select
+                  aria-label="Pillar"
+                  value={item.pillar}
+                  disabled={isPending}
+                  onChange={(e) => handlePillarChange(item.id, e.target.value as Pillar)}
+                  style={{
+                    fontFamily: '"IBM Plex Mono", monospace',
+                    fontSize: '0.7rem',
+                    color: 'var(--azure)',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 4,
+                    padding: '3px 6px',
+                    cursor: isPending ? 'wait' : 'pointer',
+                    maxWidth: '100%',
+                  }}
+                >
+                  {PILLAR_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div style={{ fontWeight: 500, fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
                 {item.title}
@@ -304,7 +349,34 @@ export default function ClientReviewQueue({ initialDrafts }: { initialDrafts: Pu
             )}
             
             <div style={{ marginBottom: 48 }}>
-              <h3 style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 16 }}>1. PULSE CARD PREVIEW</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+                <h3 style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>1. PULSE CARD PREVIEW</h3>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--text-muted)' }}>
+                  <span>Pillar:</span>
+                  <select
+                    aria-label="Active item pillar"
+                    value={activeItem.pillar}
+                    disabled={isPending}
+                    onChange={(e) => handlePillarChange(activeItem.id, e.target.value as Pillar)}
+                    style={{
+                      fontFamily: '"IBM Plex Mono", monospace',
+                      fontSize: '0.78rem',
+                      color: 'var(--azure)',
+                      background: 'var(--panel)',
+                      border: '1px solid var(--line)',
+                      borderRadius: 6,
+                      padding: '4px 10px',
+                      cursor: isPending ? 'wait' : 'pointer',
+                    }}
+                  >
+                    {PILLAR_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               <div style={{ width: 320 }}>
                 <PulseCard item={activeItem} />
               </div>

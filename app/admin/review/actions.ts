@@ -16,6 +16,34 @@ export async function saveDraftContent(id: string, content_md: string, demo_scen
   revalidatePath('/admin/review')
 }
 
+const ALLOWED_PILLARS = [
+  'd365-fo',
+  'dataverse-power-platform',
+  'copilot-ai-agents',
+  'industry-solutions',
+] as const
+
+export async function updatePulsePillar(id: string, pillar: string) {
+  if (!ALLOWED_PILLARS.includes(pillar as (typeof ALLOWED_PILLARS)[number])) {
+    throw new Error(`Invalid pillar: ${pillar}`)
+  }
+
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  const { error } = await supabase
+    .from('pulse_items')
+    .update({ pillar })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/review')
+  revalidatePath('/pulse')
+  revalidatePath('/d365-fo')
+  revalidatePath('/dataverse-power-platform')
+  revalidatePath('/copilot-ai-agents')
+  revalidatePath('/industry-solutions')
+}
+
 export async function togglePodcastApproval(id: string, approved: boolean) {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
