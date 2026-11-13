@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from('pulse_items')
     .select('*', { count: 'exact' })
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
 

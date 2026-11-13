@@ -61,7 +61,12 @@ export async function generateMetadata({
   const { id } = await params
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
-  let { data: item } = await supabase.from('pulse_items').select('title, summary').eq('id', id).single()
+  let { data: item } = await supabase
+    .from('pulse_items')
+    .select('title, summary')
+    .eq('id', id)
+    .eq('status', 'live')
+    .single()
   
   if (!item) {
     // Fallback to seed data so landing page links don't 404
@@ -83,7 +88,12 @@ export default async function PulseDetailPage({
   const { id } = await params
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
-  let { data: item } = await supabase.from('pulse_items').select('*').eq('id', id).single()
+  let { data: item } = await supabase
+    .from('pulse_items')
+    .select('*')
+    .eq('id', id)
+    .eq('status', 'live')
+    .single()
   
   if (!item) {
     // Fallback to seed data so landing page links don't 404
@@ -106,6 +116,7 @@ export default async function PulseDetailPage({
     .from('pulse_items')
     .select('*')
     .eq('pillar', item.pillar)
+    .eq('status', 'live')
     .neq('id', item.id)
     .limit(3)
     

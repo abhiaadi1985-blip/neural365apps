@@ -41,6 +41,7 @@ export async function GET() {
   const { data: pulseData } = await supabase
     .from('pulse_items')
     .select('id, title, summary, pillar, published_at')
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
     .limit(20)
 

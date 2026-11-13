@@ -52,6 +52,19 @@ export async function GET(req: NextRequest) {
   })
 }
 
+const VALID_PILLARS = [
+  'd365-fo',
+  'dataverse-power-platform',
+  'copilot-ai-agents',
+  'industry-solutions',
+] as const
+
+const VALID_LANES = [
+  'new',
+  'coming',
+  'architecture',
+] as const
+
 interface RevisionPayload {
   type: 'pulse' | 'blog'
   id: string
@@ -61,6 +74,10 @@ interface RevisionPayload {
   demo_scenario_md?: string
   body_md?: string
   subtitle?: string
+  source_url?: string
+  source_name?: string
+  pillar?: string
+  lane?: string
 }
 
 export async function POST(req: NextRequest) {
@@ -79,6 +96,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'type ("pulse" | "blog") and id are required' }, { status: 400 })
   }
 
+  if (body.pillar !== undefined) {
+    if (!VALID_PILLARS.includes(body.pillar as typeof VALID_PILLARS[number])) {
+      return NextResponse.json(
+        { error: `Invalid pillar "${body.pillar}". Must be one of: ${VALID_PILLARS.join(', ')}` },
+        { status: 400 }
+      )
+    }
+  }
+
+  if (body.lane !== undefined) {
+    if (!VALID_LANES.includes(body.lane as typeof VALID_LANES[number])) {
+      return NextResponse.json(
+        { error: `Invalid lane "${body.lane}". Must be one of: ${VALID_LANES.join(', ')}` },
+        { status: 400 }
+      )
+    }
+  }
+
   const supabase = createAdminClient()
   if (!supabase) {
     return NextResponse.json({ error: 'Server misconfiguration: admin client unavailable' }, { status: 500 })
@@ -92,10 +127,14 @@ export async function POST(req: NextRequest) {
 
   if (body.title !== undefined) updates.title = body.title
   if (body.summary !== undefined) updates.summary = body.summary
+  if (body.source_url !== undefined) updates.source_url = body.source_url
+  if (body.source_name !== undefined) updates.source_name = body.source_name
+  if (body.pillar !== undefined) updates.pillar = body.pillar
 
   if (body.type === 'pulse') {
     if (body.content_md !== undefined) updates.content_md = body.content_md
     if (body.demo_scenario_md !== undefined) updates.demo_scenario_md = body.demo_scenario_md
+    if (body.lane !== undefined) updates.lane = body.lane
   } else {
     if (body.body_md !== undefined) updates.body_md = body.body_md
     if (body.subtitle !== undefined) updates.subtitle = body.subtitle

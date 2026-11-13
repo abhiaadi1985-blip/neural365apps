@@ -45,7 +45,7 @@ export default async function PulsePage({
   let query = supabase
     .from('pulse_items')
     .select('*')
-    // For now we don't filter by status='live' because we want to see everything during testing
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
     
   if (activePillar !== 'all') {

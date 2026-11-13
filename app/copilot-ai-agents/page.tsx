@@ -31,6 +31,7 @@ export default async function CopilotPage() {
     .from('pulse_items')
     .select('*')
     .eq('pillar', 'copilot-ai-agents')
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
   const pulseItems = (dbPulse && dbPulse.length > 0) ? dbPulse : SEED_PULSE.filter(i => i.pillar === 'copilot-ai-agents')
 

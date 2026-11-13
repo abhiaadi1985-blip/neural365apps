@@ -31,6 +31,7 @@ export default async function D365FOPage() {
     .from('pulse_items')
     .select('*')
     .eq('pillar', 'd365-fo')
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
   const pulseItems = (dbPulse && dbPulse.length > 0) ? dbPulse : SEED_PULSE.filter(i => i.pillar === 'd365-fo')
 

@@ -28,6 +28,7 @@ export default async function HomePage() {
   const { data: pulseData } = await supabase
     .from('pulse_items')
     .select('*')
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
     .limit(3)
 

@@ -31,6 +31,7 @@ export default async function DataversePage() {
     .from('pulse_items')
     .select('*')
     .eq('pillar', 'dataverse-power-platform')
+    .eq('status', 'live')
     .order('published_at', { ascending: false })
   const pulseItems = (dbPulse && dbPulse.length > 0) ? dbPulse : SEED_PULSE.filter(i => i.pillar === 'dataverse-power-platform')
 
