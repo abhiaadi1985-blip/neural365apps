@@ -12,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     '',
     '/pulse',
+    '/pulse/archive',
     '/blog',
     '/d365-fo',
     '/dataverse-power-platform',

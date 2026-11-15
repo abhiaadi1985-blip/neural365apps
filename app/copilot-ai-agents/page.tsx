@@ -9,6 +9,7 @@ import RelatedGuides from '@/components/related-guides'
 import type { GuideStub } from '@/components/related-guides'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { getPulseCutoffDate } from '@/lib/pulse-lifecycle'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,12 +27,14 @@ const RELATED_GUIDES: GuideStub[] = [
 export default async function CopilotPage() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
+  const cutoff = getPulseCutoffDate()
 
   const { data: dbPulse } = await supabase
     .from('pulse_items')
     .select('*')
     .eq('pillar', 'copilot-ai-agents')
     .eq('status', 'live')
+    .gte('published_at', cutoff)
     .order('published_at', { ascending: false })
   const pulseItems = (dbPulse && dbPulse.length > 0) ? dbPulse : SEED_PULSE.filter(i => i.pillar === 'copilot-ai-agents')
 

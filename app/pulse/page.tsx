@@ -5,6 +5,7 @@ import type { PulseItem } from '@/lib/seed-pulse'
 import { landing } from '@/app/copy'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { getPulseCutoffDate } from '@/lib/pulse-lifecycle'
 
 export const metadata: Metadata = {
   title: 'The Pulse — neural365 COMMUNITY',
@@ -41,11 +42,13 @@ export default async function PulsePage({
 
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
+  const cutoff = getPulseCutoffDate()
   
   let query = supabase
     .from('pulse_items')
     .select('*')
     .eq('status', 'live')
+    .gte('published_at', cutoff)
     .order('published_at', { ascending: false })
     
   if (activePillar !== 'all') {
@@ -57,15 +60,15 @@ export default async function PulsePage({
 
   const { data, error } = await query
   
-  // If Supabase returns no data (table empty / not yet migrated), fall back to seed data
-  // so the page never shows blank while the DB is being set up
-  let dbItems = data || []
-  
-  if (dbItems.length === 0) {
+  // If Supabase returns no data (DB unconfigured / dev fallback), fallback only when data is null
+  let dbItems: PulseItem[] = []
+  if (data !== null) {
+    dbItems = data as unknown as PulseItem[]
+  } else if (process.env.NODE_ENV !== 'production') {
     dbItems = SEED_PULSE.filter(item =>
       (activePillar === 'all' || item.pillar === activePillar) &&
       (activeLane   === 'all' || item.lane   === activeLane)
-    ) as typeof dbItems
+    ) as unknown as PulseItem[]
   }
   
   const filtered = dbItems
@@ -130,6 +133,26 @@ export default async function PulsePage({
               {l.label}
             </Link>
           ))}
+
+          <span style={{ color: 'var(--line)', flexShrink: 0 }}>|</span>
+          <Link
+            href="/pulse/archive"
+            style={{
+              padding: '6px 14px',
+              borderRadius: 7,
+              fontSize: '0.82rem',
+              fontWeight: 500,
+              border: '1px solid var(--line)',
+              color: 'var(--text-muted)',
+              background: 'transparent',
+              transition: 'all 0.15s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              marginLeft: 'auto',
+            }}
+          >
+            Archive (90d+) →
+          </Link>
         </div>
       </section>
 
@@ -139,9 +162,28 @@ export default async function PulsePage({
           {filtered.length > 0
             ? <PulseGrid items={filtered} limit={100} />
             : (
-              <p style={{ color: 'var(--text-muted)', fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.88rem' }}>
-                No items match this filter combination.
-              </p>
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '48px 24px',
+                  background: 'var(--panel)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--radius)',
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: 12 }}>📦</div>
+                <h3 style={{ fontSize: '1.15rem', color: 'var(--text)', marginBottom: 8, fontWeight: 600 }}>
+                  No pulses found in the last 90 days
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: 480, margin: '0 auto 20px', lineHeight: 1.5 }}>
+                  {activePillar !== 'all' || activeLane !== 'all'
+                    ? 'No fresh items match this filter combination. Check the archive for older releases.'
+                    : 'All older releases and architecture shifts are preserved in the permanent archive.'}
+                </p>
+                <Link href={`/pulse/archive?pillar=${activePillar}&lane=${activeLane}`} className="btn btn-secondary btn-sm">
+                  View in Archive (90d+) →
+                </Link>
+              </div>
             )
           }
         </div>

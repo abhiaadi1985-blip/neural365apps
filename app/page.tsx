@@ -12,6 +12,7 @@ import type { BlogPost } from '@/lib/seed-blog'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { getPulseCutoffDate } from '@/lib/pulse-lifecycle'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,12 +24,14 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
+  const cutoff = getPulseCutoffDate()
 
   // 1. Fetch latest pulse items with SEED_PULSE fallback
   const { data: pulseData } = await supabase
     .from('pulse_items')
     .select('*')
     .eq('status', 'live')
+    .gte('published_at', cutoff)
     .order('published_at', { ascending: false })
     .limit(3)
 
